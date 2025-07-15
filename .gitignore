@@ -1,0 +1,43 @@
+# === BUILD DIRS ===
+build/
+out/
+*.exe
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+
+# === VS CODE & IDE ===
+.vs/
+.vscode/*.code-workspace
+.vscode/*.suo
+.vscode/ipch/
+.vscode/.browse.VC.db
+
+# === OS-SPECIFIC ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === CMake files ===
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+Testing/
+install_manifest.txt
+
+# === LOGS ===
+*.log
+
+# === CATCH2/TEST TEMP ===
+*.test
+
+
+# === vcpkg ===
+vcpkg_installed/

@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name" : "Debug Text Adventure (GDB)",
+            "type" : "cppdbg",
+            "request" : "launch",
+            "program" : "${workspaceFolder}/build/sdl_app.exe",
+            "args" : [],
+            "cwd" : "${workspaceFolder}/build",
+            "stopAtEntry" : false,
+            "environment" : [],
+            "MIMode" : "gdb",
+            "miDebuggerPath" : "G:/Programmi/Strawberry/c/bin/gdb.exe",
+            "externalConsole": false,
+            "preLaunchTask": "CMake Build"
+        }
+    ]
+}
