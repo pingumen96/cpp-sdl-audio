@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <cassert>
 #include <algorithm>
+#include <functional>
 
 namespace math {
     template <typename T>
@@ -102,11 +103,11 @@ namespace math {
             return os << "Vec2(" << vec.x << ", " << vec.y << ")";
         }
 
-        static constexpr Vec2 zero() noexcept {
+        [[nodiscard]] static constexpr Vec2 zero() noexcept {
             return {};
         }
 
-        static constexpr Vec2 one() noexcept {
+        [[nodiscard]] static constexpr Vec2 one() noexcept {
             return { 1, 1 };
         }
     };
@@ -133,3 +134,16 @@ namespace math {
     }
 
 }  // namespace math
+
+// Specialization for std::hash
+namespace std {
+    template <math::Arithmetic T>
+    struct hash<math::Vec2<T>> {
+        std::size_t operator()(const math::Vec2<T>& vec) const noexcept {
+            std::size_t h1 = std::hash<T>()(vec.x);
+            std::size_t h2 = std::hash<T>()(vec.y);
+            return h1 ^ (h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
+        }
+    };
+}  // namespace std
+
