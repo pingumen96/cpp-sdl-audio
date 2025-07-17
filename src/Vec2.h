@@ -7,6 +7,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <type_traits>
+#include <cassert>
+#include <algorithm>
 
 namespace math {
     template <typename T>
@@ -24,10 +26,15 @@ namespace math {
         constexpr Vec2(T x, T y) noexcept : x(x), y(y) {}
         constexpr explicit Vec2(T value) noexcept : x(value), y(value) {} // explicit scalar constructor
 
+        template<Arithmetic U>
+        constexpr Vec2(const Vec2<U>& other) noexcept : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
+
         constexpr T& operator[](std::size_t i) noexcept {
+            assert(i < 2 && "Index out of bounds");
             return (i == 0) ? x : y;
         }
         constexpr const T& operator[](std::size_t i) const noexcept {
+            assert(i < 2 && "Index out of bounds");
             return (i == 0) ? x : y;
         }
 
@@ -47,6 +54,10 @@ namespace math {
             return *this;
         }
         constexpr Vec2& operator/=(T scalar) noexcept {
+            if (scalar == T{}) {
+                throw std::domain_error("Division by zero");
+            }
+
             x /= scalar;
             y /= scalar;
             return *this;
@@ -80,12 +91,11 @@ namespace math {
             return std::sqrt(static_cast<std::common_type_t<T, double>>(lengthSquared()));
         }
 
-        [[nodiscard]] constexpr Vec2 normalized() const {
+        [[nodiscard]] constexpr Vec2 normalized() const noexcept {
             auto len = length();
-            if (len == 0) {
-                throw std::runtime_error("Cannot normalize a zero-length vector");
-            }
-            return Vec2<long double>(x / len, y / len);
+            assert(len != T{} && "Cannot normalize zero-length vector");
+            auto inv = T(1) / len;
+            return { x * inv, y * inv };
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Vec2& vec) {
@@ -101,6 +111,8 @@ namespace math {
         }
     };
 
+
+    // helpers
     using Vec2f = Vec2<float>;
     using Vec2d = Vec2<double>;
     using Vec2i = Vec2<int>;
@@ -109,4 +121,15 @@ namespace math {
     [[nodiscard]] constexpr auto cross(const Vec2<T>& a, const Vec2<T>& b) noexcept {
         return a.x * b.y - a.y * b.x;
     }
+
+    template<Arithmetic T>
+    [[nodiscard]] constexpr Vec2<T> clamp(const Vec2<T>& v,
+        const Vec2<T>& min,
+        const Vec2<T>& max) noexcept {
+        return {
+            std::clamp(v.x, min.x, max.x),
+            std::clamp(v.y, min.y, max.y)
+        };
+    }
+
 }  // namespace math
