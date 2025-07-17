@@ -39,22 +39,22 @@ namespace math {
             return (i == 0) ? x : y;
         }
 
-        constexpr Vec2& operator+=(const Vec2& other) noexcept {
+        [[nodiscard]] constexpr Vec2& operator+=(const Vec2& other) noexcept {
             x += other.x;
             y += other.y;
             return *this;
         }
-        constexpr Vec2& operator-=(const Vec2& other) noexcept {
+        [[nodiscard]] constexpr Vec2& operator-=(const Vec2& other) noexcept {
             x -= other.x;
             y -= other.y;
             return *this;
         }
-        constexpr Vec2& operator*=(T scalar) noexcept {
+        [[nodiscard]] constexpr Vec2& operator*=(T scalar) noexcept {
             x *= scalar;
             y *= scalar;
             return *this;
         }
-        constexpr Vec2& operator/=(T scalar) noexcept {
+        [[nodiscard]] constexpr Vec2& operator/=(T scalar) noexcept {
             if (scalar == T{}) {
                 throw std::domain_error("Division by zero");
             }
@@ -64,10 +64,10 @@ namespace math {
             return *this;
         }
 
-        constexpr Vec2 operator+() const noexcept {
+        [[nodiscard]] constexpr Vec2 operator+() const noexcept {
             return *this;
         }
-        constexpr Vec2 operator-() const noexcept {
+        [[nodiscard]] constexpr Vec2 operator-() const noexcept {
             return { -x, -y };
         }
 
