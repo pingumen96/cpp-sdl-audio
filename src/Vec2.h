@@ -1,149 +1,178 @@
 #pragma once
-
-// generic 2D vector class, template on T with sum, difference, scalar
-// multiplication, dot product, norm, and normalization
+// math/vec.hpp – n-dimensional constexpr vector
+#include <array>
 #include <cmath>
 #include <concepts>
 #include <iostream>
-#include <stdexcept>
 #include <type_traits>
 #include <cassert>
 #include <algorithm>
 #include <functional>
 
 namespace math {
+
+    // --- concept ---------------------------------------------------------------
     template <typename T>
     concept Arithmetic = std::is_arithmetic_v<T>;
 
-
-    template <Arithmetic T>
-    struct Vec2 {
+    // --- Vec<N,T> --------------------------------------------------------------
+    template <std::size_t N, Arithmetic T>
+    struct Vec {
         using ValueType = T;
+        static constexpr std::size_t Dim = N;
 
-        T x{};
-        T y{};
+        std::array<T, N> data{};
 
-        constexpr Vec2() noexcept = default;
-        constexpr Vec2(T x, T y) noexcept : x(x), y(y) {}
-        constexpr explicit Vec2(T value) noexcept : x(value), y(value) {} // explicit scalar constructor
+        /*---------------- constructors ----------------*/
+        constexpr Vec() noexcept = default;
 
-        template<Arithmetic U>
-        constexpr Vec2(const Vec2<U>& other) noexcept : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
+        template <class... U>
+            requires (sizeof...(U) == N) &&
+        (std::is_convertible_v<U, T> && ...)
+            explicit constexpr Vec(U... xs) noexcept : data{ static_cast<T>(xs)... } {}
 
-        constexpr T& operator[](std::size_t i) noexcept {
-            assert(i < 2 && "Index out of bounds");
-            return (i == 0) ? x : y;
-        }
-        constexpr const T& operator[](std::size_t i) const noexcept {
-            assert(i < 2 && "Index out of bounds");
-            return (i == 0) ? x : y;
+        template <Arithmetic U>
+        constexpr Vec(const Vec<N, U>& other) noexcept {
+            for (std::size_t i = 0; i < N; ++i)
+                data[i] = static_cast<T>(other[i]);
         }
 
-        [[nodiscard]] constexpr Vec2& operator+=(const Vec2& other) noexcept {
-            x += other.x;
-            y += other.y;
+        /*---------------- indexing ----------------*/
+        constexpr       T& operator[](std::size_t i)       noexcept { assert(i < N); return data[i]; }
+        constexpr const T& operator[](std::size_t i) const noexcept { assert(i < N); return data[i]; }
+
+        /*---------------- arithmetic ----------------*/
+        [[nodiscard]] constexpr Vec& operator+=(const Vec& o) noexcept {
+            for (std::size_t i = 0; i < N; ++i) data[i] += o[i];
             return *this;
         }
-        [[nodiscard]] constexpr Vec2& operator-=(const Vec2& other) noexcept {
-            x -= other.x;
-            y -= other.y;
+        [[nodiscard]] constexpr Vec& operator-=(const Vec& o) noexcept {
+            for (std::size_t i = 0; i < N; ++i) data[i] -= o[i];
             return *this;
         }
-        [[nodiscard]] constexpr Vec2& operator*=(T scalar) noexcept {
-            x *= scalar;
-            y *= scalar;
+        [[nodiscard]] constexpr Vec& operator*=(T s) noexcept {
+            for (auto& v : data) v *= s;
             return *this;
         }
-        [[nodiscard]] constexpr Vec2& operator/=(T scalar) noexcept {
-            if (scalar == T{}) {
-                throw std::domain_error("Division by zero");
-            }
-
-            x /= scalar;
-            y /= scalar;
+        [[nodiscard]] constexpr Vec& operator/=(T s) {
+            if (s == T{}) throw std::domain_error("Division by zero");
+            for (auto& v : data) v /= s;
             return *this;
         }
 
-        [[nodiscard]] constexpr Vec2 operator+() const noexcept {
-            return *this;
-        }
-        [[nodiscard]] constexpr Vec2 operator-() const noexcept {
-            return { -x, -y };
-        }
-
-        friend constexpr Vec2 operator+(Vec2 lhs, const Vec2& rhs) noexcept { return lhs += rhs; }
-        friend constexpr Vec2 operator-(Vec2 lhs, const Vec2& rhs) noexcept { return lhs -= rhs; }
-        friend constexpr Vec2 operator*(Vec2 lhs, T s) noexcept { return lhs *= s; }
-        friend constexpr Vec2 operator*(T s, Vec2 rhs) noexcept { return rhs *= s; }
-        friend constexpr Vec2 operator/(Vec2 lhs, T s) noexcept { return lhs /= s; }
-
-        friend constexpr bool operator==(const Vec2&, const Vec2&) = default;
-        friend constexpr auto operator<=>(const Vec2&, const Vec2&) = default;
-
-        [[nodiscard]] constexpr T dot(const Vec2& other) const noexcept {
-            return x * other.x + y * other.y;
+        /*---------------- unary ----------------*/
+        [[nodiscard]] constexpr Vec  operator+() const noexcept { return *this; }
+        [[nodiscard]] constexpr Vec  operator-() const noexcept {
+            Vec r{};
+            for (std::size_t i = 0; i < N; ++i) r[i] = -data[i];
+            return r;
         }
 
-        [[nodiscard]] constexpr auto lengthSquared() const noexcept {
-            return dot(*this);
+        /*---------------- binary free ops ----------------*/
+        friend constexpr Vec operator+(Vec a, const Vec& b) noexcept { return a += b; }
+        friend constexpr Vec operator-(Vec a, const Vec& b) noexcept { return a -= b; }
+        friend constexpr Vec operator*(Vec a, T s)        noexcept { return a *= s; }
+        friend constexpr Vec operator*(T s, Vec a)        noexcept { return a *= s; }
+        friend constexpr Vec operator/(Vec a, T s) { return a /= s; }
+
+        friend constexpr bool operator==(const Vec&, const Vec&) = default;
+        friend constexpr auto operator<=>(const Vec&, const Vec&) = default;
+
+        /*---------------- math helpers ----------------*/
+        [[nodiscard]] constexpr T dot(const Vec& o) const noexcept {
+            T acc{};
+            for (std::size_t i = 0; i < N; ++i) acc += data[i] * o[i];
+            return acc;
         }
+
+        [[nodiscard]] constexpr auto lengthSquared() const noexcept { return dot(*this); }
 
         [[nodiscard]] constexpr auto length() const noexcept {
             return std::sqrt(static_cast<std::common_type_t<T, double>>(lengthSquared()));
         }
 
-        [[nodiscard]] constexpr Vec2 normalized() const noexcept {
+        [[nodiscard]] constexpr Vec normalized() const {
             auto len = length();
             assert(len != T{} && "Cannot normalize zero-length vector");
-            auto inv = T(1) / len;
-            return { x * inv, y * inv };
+            return (*this) / static_cast<T>(len);
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const Vec2& vec) {
-            return os << "Vec2(" << vec.x << ", " << vec.y << ")";
+        /*---------------- factories ----------------*/
+        [[nodiscard]] static constexpr Vec zero() noexcept { return {}; }
+
+        [[nodiscard]] static constexpr Vec one() noexcept {
+            Vec r{};
+            r.data.fill(T{ 1 });
+            return r;
         }
 
-        [[nodiscard]] static constexpr Vec2 zero() noexcept {
-            return {};
-        }
-
-        [[nodiscard]] static constexpr Vec2 one() noexcept {
-            return { 1, 1 };
+        /*---------------- ostream ----------------*/
+        friend std::ostream& operator<<(std::ostream& os, const Vec& v) {
+            os << "Vec" << N << "(";
+            for (std::size_t i = 0; i < N; ++i) {
+                os << v[i] << (i + 1 < N ? ", " : "");
+            }
+            return os << ")";
         }
     };
 
-
-    // helpers
-    using Vec2f = Vec2<float>;
-    using Vec2d = Vec2<double>;
-    using Vec2i = Vec2<int>;
-
+    /*================ special utilities =================*/
+    /* --- cross product --- */
     template <Arithmetic T>
-    [[nodiscard]] constexpr auto cross(const Vec2<T>& a, const Vec2<T>& b) noexcept {
-        return a.x * b.y - a.y * b.x;
+    [[nodiscard]] constexpr T cross(const Vec<2, T>& a, const Vec<2, T>& b) noexcept {
+        return a[0] * b[1] - a[1] * b[0];
     }
 
-    template<Arithmetic T>
-    [[nodiscard]] constexpr Vec2<T> clamp(const Vec2<T>& v,
-        const Vec2<T>& min,
-        const Vec2<T>& max) noexcept {
+    template <Arithmetic T>
+    [[nodiscard]] constexpr Vec<3, T> cross(const Vec<3, T>& a, const Vec<3, T>& b) noexcept {
         return {
-            std::clamp(v.x, min.x, max.x),
-            std::clamp(v.y, min.y, max.y)
+            a[1] * b[2] - a[2] * b[1],
+            a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0]
         };
     }
 
-}  // namespace math
+    /* --- clamp (component-wise) --- */
+    template <std::size_t N, Arithmetic T>
+    [[nodiscard]] constexpr Vec<N, T> clamp(const Vec<N, T>& v,
+        const Vec<N, T>& min,
+        const Vec<N, T>& max) noexcept {
+        Vec<N, T> r{};
+        for (std::size_t i = 0; i < N; ++i)
+            r[i] = std::clamp(v[i], min[i], max[i]);
+        return r;
+    }
 
-// Specialization for std::hash
+    /*================ handy aliases =================*/
+    template <Arithmetic T> using Vec2 = Vec<2, T>;
+    template <Arithmetic T> using Vec3 = Vec<3, T>;
+    template <Arithmetic T> using Vec4 = Vec<4, T>;
+
+    using Vec2f = Vec2<float>;
+    using Vec3f = Vec3<float>;
+    using Vec4f = Vec4<float>;
+
+    using Vec2d = Vec2<double>;
+    using Vec3d = Vec3<double>;
+    using Vec4d = Vec4<double>;
+
+    using Vec2i = Vec2<int>;
+    using Vec3i = Vec3<int>;
+    using Vec4i = Vec4<int>;
+
+} // namespace math
+
+/*================ hash specialisation =================*/
 namespace std {
-    template <math::Arithmetic T>
-    struct hash<math::Vec2<T>> {
-        std::size_t operator()(const math::Vec2<T>& vec) const noexcept {
-            std::size_t h1 = std::hash<T>()(vec.x);
-            std::size_t h2 = std::hash<T>()(vec.y);
-            return h1 ^ (h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
+    template <size_t N, math::Arithmetic T>
+    struct hash<math::Vec<N, T>> {
+        size_t operator()(const math::Vec<N, T>& v) const noexcept {
+            size_t seed = 0x9e3779b97f4a7c15ULL;
+            for (size_t i = 0; i < N; ++i) {
+                size_t h = hash<T>{}(v[i]);
+                seed ^= h + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2);
+            }
+            return seed;
         }
     };
-}  // namespace std
-
+} // namespace std
