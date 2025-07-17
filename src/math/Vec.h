@@ -97,6 +97,33 @@ namespace math {
             return (*this) / static_cast<T>(len);
         }
 
+        /*---------------- interpolation ----------------*/
+        /**
+         *  Linearly interpolate between two vectors:
+         *  t = 0 → a  t = 1 → b
+         *
+         *  @tparam U  Qualsiasi tipo aritmetico convertibile a common_type<T,U>
+         *  @param  a  vettore di partenza
+         *  @param  b  vettore di arrivo
+         *  @param  t  blending factor (0–1 di solito, ma non obbligatorio)
+         */
+        template <Arithmetic U>
+        [[nodiscard]] static constexpr Vec lerp(const Vec& a,
+            const Vec& b,
+            U t) noexcept {
+            using CT = std::common_type_t<T, U>;   // calcoli in precisione “comune”
+            Vec r{};
+            const CT ct = static_cast<CT>(t);
+
+            for (std::size_t i = 0; i < N; ++i) {
+                const CT ai = static_cast<CT>(a[i]);
+                const CT bi = static_cast<CT>(b[i]);
+                r[i] = static_cast<T>(ai + (bi - ai) * ct);
+            }
+            return r;
+        }
+
+
         /*---------------- factories ----------------*/
         [[nodiscard]] static constexpr Vec zero() noexcept { return {}; }
 
