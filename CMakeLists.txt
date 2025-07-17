@@ -14,6 +14,14 @@ else()
 #add_compile_options(-Wall -Wextra -Werror)
 endif()
 
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.8.1
+)
+FetchContent_MakeAvailable(Catch2)
+
 list(APPEND CMAKE_PREFIX_PATH E:/Progetti/vcpkg/installed/x64-mingw-static/share/sdl2)
 
 find_package(SDL2 REQUIRED)
@@ -48,3 +56,21 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 
 
 target_link_libraries(sdl_app PRIVATE SDL2::SDL2)
+
+
+# test
+add_executable(sdl_appTests src/tests/test_vec.cpp src/tests/test_rect.cpp)
+
+# Linka con Catch2 (versione 3.x)
+target_link_libraries(sdl_appTests PRIVATE Catch2::Catch2WithMain)
+
+add_test(sdl_appTests
+  NAME sdl_appTests
+  COMMAND sdl_appTests
+)
+
+# Se hai bisogno degli include di progetto
+target_include_directories(sdl_appTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include(CTest)
+include(Catch)
+catch_discover_tests(sdl_appTests)
