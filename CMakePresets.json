@@ -27,7 +27,7 @@
     },
     "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_TOOLCHAIN_FILE": "E:/Progetti/vcpkg/scripts/buildsystems"
+        "CMAKE_TOOLCHAIN_FILE": "E:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake"
     }
 },
         {

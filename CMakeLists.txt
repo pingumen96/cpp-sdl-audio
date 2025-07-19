@@ -1,6 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.21)
 project(sdl_app LANGUAGES CXX)
 
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -22,9 +23,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-list(APPEND CMAKE_PREFIX_PATH E:/Progetti/vcpkg/installed/x64-mingw-static/share/sdl2)
-
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
 
 add_executable(sdl_app
@@ -55,7 +57,7 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 
 
 
-target_link_libraries(sdl_app PRIVATE SDL2::SDL2)
+target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf)
 
 
 # test

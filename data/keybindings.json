@@ -1,0 +1,8 @@
+{
+    "Left": "moveLeft",
+    "Right": "moveRight",
+    "Up": "jump",
+    "X": "attack",
+    "Z": "undo",
+    "Esc": "pause",
+}
