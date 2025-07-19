@@ -2,6 +2,11 @@
 #include "PlayingState.h"
 #include "MenuState.h"
 
+#include "../Game.h"
+
+#include <SDL2/SDL.h>
+#include <iostream>
+
 void game::PausedState::handleEvent(Game& game, const SDL_Event& ev) {
     if (ev.type == SDL_KEYDOWN) {
         if (ev.key.keysym.sym == SDLK_ESCAPE) {

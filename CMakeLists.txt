@@ -34,6 +34,11 @@ add_executable(sdl_app
 src/main.cpp
 src/AudioSample.cpp
 src/game/Game.h
+src/game/input/JumpCommand.cpp
+src/game/input/MoveLeftCommand.cpp
+src/game/input/MoveRightCommand.cpp
+src/game/input/PauseCommand.cpp
+src/game/input/InputHandler.cpp
 src/game/player_state/AirborneState.cpp
 src/game/player_state/StandingState.cpp
 src/game/player_state/DuckingState.cpp

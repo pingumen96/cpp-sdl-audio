@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../Avatar.h"
 
+
+namespace game { class Avatar; }
 
 namespace game::input {
     class Command {
     public:
         virtual ~Command() = default;
-        virtual void execute(Avatar& avatar) = 0;
+        virtual void execute(game::Avatar& avatar) = 0;
     };
 
 }

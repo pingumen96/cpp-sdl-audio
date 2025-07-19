@@ -3,14 +3,11 @@
 #include "Command.h"
 #include "../Avatar.h"
 
-#include <iostream>
-#include <memory>
+namespace game { class Avatar; }
 
 namespace game::input {
     class JumpCommand : public Command {
     public:
-        void execute(Avatar& avatar) override {
-            avatar.jump();
-        }
+        void execute(Avatar& avatar) override;
     };
 }

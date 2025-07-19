@@ -2,8 +2,8 @@
 #pragma once
 #include "GameState.h"
 
-#include <iostream>
 namespace game {
+    class Game; // forward declaration
     class PausedState : public GameState {
     public:
         const char* name() const override { return "Paused"; }

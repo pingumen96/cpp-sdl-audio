@@ -2,14 +2,19 @@
 #include "../Game.h"
 #include "PlayingState.h"
 
+#include <SDL2/SDL.h>
+#include <iostream>
+
 void game::MenuState::handleEvent(game::Game& game, const SDL_Event& ev) {
     if (ev.type == SDL_KEYDOWN) {
         switch (ev.key.keysym.sym) {
         case SDLK_UP:
             selected = (selected - 1 + (int)entries.size()) % entries.size();
+            std::cout << "Selected: " << entries[selected] << "\n";
             break;
         case SDLK_DOWN:
             selected = (selected + 1) % entries.size();
+            std::cout << "Selected: " << entries[selected] << "\n";
             break;
         case SDLK_RETURN:
         case SDLK_KP_ENTER:
@@ -27,8 +32,7 @@ void game::MenuState::handleEvent(game::Game& game, const SDL_Event& ev) {
 
 void game::MenuState::render(Game& game) {
     // placeholder rendering logic
-    std::cout << "[Menu] Rendering Menu State\n";
-    std::cout << "[Menu] Selected: " << entries[selected] << "\n";
+
 }
 
 

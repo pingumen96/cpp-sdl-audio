@@ -1,11 +1,10 @@
 // GameState.h
 #pragma once
+
 #include <SDL2/SDL.h>
 
-#include "../Game.h"
-
 namespace game {
-    class Game;
+    class Game; // forward declaration
     class GameState {
     public:
         virtual ~GameState() = default;

@@ -3,10 +3,9 @@
 #include "GameState.h"
 #include <vector>
 #include <string>
-#include <iostream>
 
 namespace game {
-    class Game;
+    class Game; // forward declaration
     class MenuState : public GameState {
         int selected = 0;
         std::vector<std::string> entries = { "Start", "Options", "Quit" };
