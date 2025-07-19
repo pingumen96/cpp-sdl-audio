@@ -1,5 +1,16 @@
 {
     "tasks": [
+                {
+            "label": "Clean PATH",
+            "type": "shell",
+            "command": "$env:PATH = ($env:PATH -split ';') -notmatch 'Strawberry' -join ';'",
+            "problemMatcher": [],
+            "windows": {
+                "shell": {
+                    "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+                }
+            }
+        },
         {
             "label" : "CMake Configure",
             "type" : "shell",
@@ -12,6 +23,7 @@
                 "-DCMAKE_TOOLCHAIN_FILE=E:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake",
                 "-DVCPKG_TARGET_TRIPLET=x64-mingw-static"
             ],
+            "dependsOn": "Clean PATH",
             "group": "build"
         },
         {
@@ -34,14 +46,14 @@
             "command": "cmake",
             "args": [
                 "--build", "${workspaceFolder}/build",
-                "--target", "TextAdventureTests"
+                "--target", "sdl_appTests"
             ],
             "group": "build"
         },
         {
-            "label": "Run TextAdventureTests",
+            "label": "Run sdl_appTests",
             "type": "shell",
-            "command": "${workspaceFolder}/build/TextAdventureTests.exe",
+            "command": "${workspaceFolder}/build/sdl_appTests.exe",
             "group": "test",
             "dependsOn": "CMake Build Tests",
             "presentation": {

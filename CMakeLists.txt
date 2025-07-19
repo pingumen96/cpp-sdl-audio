@@ -27,6 +27,7 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 
 add_executable(sdl_app
@@ -57,11 +58,11 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 
 
 
-target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf)
+target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static SDL2_ttf::SDL2_ttf-static nlohmann_json::nlohmann_json)
 
 
 # test
-add_executable(sdl_appTests src/tests/test_vec.cpp src/tests/test_rect.cpp)
+add_executable(sdl_appTests src/tests/main_test.cpp)
 
 # Linka con Catch2 (versione 3.x)
 target_link_libraries(sdl_appTests PRIVATE Catch2::Catch2WithMain)

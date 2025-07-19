@@ -1,8 +1,8 @@
 {
-    "Left": "moveLeft",
-    "Right": "moveRight",
-    "Up": "jump",
-    "X": "attack",
-    "Z": "undo",
-    "Esc": "pause",
+    "SDLK_LEFT": "moveLeft",
+    "SDLK_RIGHT": "moveRight",
+    "SDLK_UP": "jump",
+    "SDLK_x": "attack",
+    "SDLK_z": "undo",
+    "SDLK_ESCAPE": "pause"
 }
