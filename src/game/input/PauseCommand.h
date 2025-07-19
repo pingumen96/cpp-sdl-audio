@@ -7,10 +7,12 @@
 #include <memory>
 
 namespace game::input {
-    class JumpCommand : public Command {
+
+    class PauseCommand : public Command {
     public:
         void execute(Avatar& avatar) override {
-            avatar.jump();
+            // Logica per mettere in pausa il gioco
+            std::cout << "Pausing game\n";
         }
     };
 }

@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/vcpkg_installed/x64-windows/include"
+                "${workspaceFolder}/vcpkg_installed/x64-mingw-static/include"
             ],
             "defines": [],
             "compilerPath": "C:/msys64/mingw64/bin/g++.exe",

@@ -33,6 +33,13 @@ find_package(nlohmann_json REQUIRED)
 add_executable(sdl_app
 src/main.cpp
 src/AudioSample.cpp
+src/game/Game.h
+src/game/player_state/AirborneState.cpp
+src/game/player_state/StandingState.cpp
+src/game/player_state/DuckingState.cpp
+src/game/state/MenuState.cpp
+src/game/state/PlayingState.cpp
+src/game/state/PausedState.cpp
 )
 
 set_target_properties(sdl_app PROPERTIES

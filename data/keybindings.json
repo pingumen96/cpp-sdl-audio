@@ -2,7 +2,5 @@
     "move_left": "LEFT",
     "move_right": "RIGHT",
     "jump": "UP",
-    "attack": "x",
-    "undo": "z",
     "pause": "ESCAPE"
 }
