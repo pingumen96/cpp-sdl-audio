@@ -56,13 +56,12 @@ PRIVATE
 ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# 1. Definisci PROJECT_SOURCE_DIR come macro C++ contenente la cartella root
+
 string(REPLACE "\\" "/" PROJECT_SRC_ESC "${CMAKE_SOURCE_DIR}")
 target_compile_definitions(sdl_app PRIVATE
 PROJECT_SOURCE_DIR=\"${PROJECT_SRC_ESC}\"
 )
 
-# 2. Continua a fare il copy della directory data in /data accanto all’exe
 add_custom_command(TARGET sdl_app POST_BUILD
 COMMAND ${CMAKE_COMMAND} -E copy_directory
 "${CMAKE_SOURCE_DIR}/data"
@@ -73,10 +72,8 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static SDL2_ttf::SDL2_ttf-static nlohmann_json::nlohmann_json)
 
 
-# test
 add_executable(sdl_appTests src/tests/main_test.cpp)
 
-# Linka con Catch2 (versione 3.x)
 target_link_libraries(sdl_appTests PRIVATE Catch2::Catch2WithMain)
 
 add_test(sdl_appTests
@@ -84,7 +81,6 @@ add_test(sdl_appTests
   COMMAND sdl_appTests
 )
 
-# Se hai bisogno degli include di progetto
 target_include_directories(sdl_appTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(CTest)
 include(Catch)
