@@ -11,7 +11,7 @@ namespace game {
             // ... roba varia ...
             inputHandler = std::make_unique<input::InputHandler>();
 
-            inputHandler->loadBindings("data/input_bindings.json");
+            inputHandler->loadBindings("data/input_bindings.json", avatar);
         }
 
         void mainLoop() {
