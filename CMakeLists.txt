@@ -12,7 +12,7 @@ add_compile_options(/W4 /permissive- /WX)
 add_compile_options(/utf-8)
 set(CMAKE_CXX_FLAGS_DEBUG "/Zi /Od /W4 /WX /MDd /permissive-")
 else()
-#add_compile_options(-Wall -Wextra -Werror)
+add_compile_options(-Wall -Wextra -Werror -Wpedantic)
 endif()
 
 include(FetchContent)

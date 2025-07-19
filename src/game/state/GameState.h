@@ -10,6 +10,7 @@ namespace game {
         virtual ~GameState() = default;
         virtual const char* name() const = 0;
 
+        // cppcheck-suppress unusedParameter
         virtual void handleEvent(Game& game, const SDL_Event& ev) {}
         virtual void update(Game& game, float dt) {}
         virtual void render(Game& game) {}
