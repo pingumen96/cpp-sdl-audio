@@ -11,7 +11,7 @@ namespace core {
     class Sdl {
     public:
         // Constructor: initialize SDL and (optionally) subsystems
-        Sdl(Uint32 sdlFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO, int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG, bool initTtf = true) {
+        Sdl(Uint32 sdlFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO, int imgFlags = IMG_INIT_PNG, bool initTtf = true) {
             if (SDL_Init(sdlFlags) != 0)
                 throw std::runtime_error(std::string("SDL_Init failed: ") + SDL_GetError());
             if (imgFlags) {

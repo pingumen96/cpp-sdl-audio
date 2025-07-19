@@ -1,8 +1,8 @@
 {
-    "SDLK_LEFT": "moveLeft",
-    "SDLK_RIGHT": "moveRight",
-    "SDLK_UP": "jump",
-    "SDLK_x": "attack",
-    "SDLK_z": "undo",
-    "SDLK_ESCAPE": "pause"
+    "move_left": "LEFT",
+    "move_right": "RIGHT",
+    "jump": "UP",
+    "attack": "x",
+    "undo": "z",
+    "pause": "ESCAPE"
 }
