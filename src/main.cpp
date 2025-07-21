@@ -20,8 +20,6 @@ int main() {
         core::Sdl sdl; // Inizializza SDL2, SDL_image, SDL_ttf
 
         core::Window window("Hello SDL", 100, 100, 800, 600);
-        core::Renderer renderer(window.get());
-
         game::Game game(window);
 
         game.init();

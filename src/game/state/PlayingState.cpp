@@ -5,7 +5,7 @@
 #include "../state/PausedState.h"
 
 
-game::PlayingState::PlayingState(core::Renderer& renderer) : backgroundTexture(renderer.get(), "data/background.png") {} // Example texture for background
+game::PlayingState::PlayingState(core::Renderer& renderer) : backgroundTexture(renderer.get(), "data/preview.png") {} // Example texture for background
 
 game::PlayingState::~PlayingState() = default;
 
