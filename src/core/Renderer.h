@@ -21,13 +21,11 @@ namespace core {
 
         SDL_Renderer* get() const { return renderer.get(); }
 
-        void clear() { SDL_RenderClear(renderer.get()); }
+        void clear();
 
-        void present() { SDL_RenderPresent(renderer.get()); }
+        void present();
 
-        void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
-            SDL_SetRenderDrawColor(renderer.get(), r, g, b, a);
-        }
+        void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
         // Prevent copy
         Renderer(const Renderer&) = delete;
