@@ -10,7 +10,7 @@
 void game::PausedState::handleEvent(Game& game, const SDL_Event& ev) {
     if (ev.type == SDL_KEYDOWN) {
         if (ev.key.keysym.sym == SDLK_ESCAPE) {
-            game.setState<game::PlayingState>(); // resume
+            game.setState<game::PlayingState>(game.getRenderer());
         } else if (ev.key.keysym.sym == SDLK_m) {
             game.setState<game::MenuState>(); // torna al menu
         }

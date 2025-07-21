@@ -12,17 +12,11 @@ namespace core {
         std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)> window;
     public:
         // Costruttori
-        Window(const char* title, int x, int y, int w, int h, Uint32 flags = SDL_WINDOW_SHOWN)
-            : window(SDL_CreateWindow(title, x, y, w, h, flags), SDL_DestroyWindow) {
-            if (!window) {
-                throw std::runtime_error(SDL_GetError());
-            }
-        }
-        Window(const std::string& title, int x, int y, int w, int h, Uint32 flags = SDL_WINDOW_SHOWN)
-            : Window(title.c_str(), x, y, w, h, flags) {}
+        Window(const char* title, int x, int y, int w, int h, Uint32 flags = SDL_WINDOW_SHOWN);
+        Window(const std::string& title, int x, int y, int w, int h, Uint32 flags = SDL_WINDOW_SHOWN);
 
         // Accesso raw pointer
-        SDL_Window* get() const { return window.get(); }
+        SDL_Window* get() const;
 
         // Titolo
         void setTitle(const char* title) { SDL_SetWindowTitle(window.get(), title); }

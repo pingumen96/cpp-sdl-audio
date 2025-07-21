@@ -11,15 +11,10 @@ namespace core {
         std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> renderer;
 
     public:
-        Renderer(SDL_Window* window, int index = -1, Uint32 flags = SDL_RENDERER_ACCELERATED)
-            : renderer(SDL_CreateRenderer(window, index, flags), SDL_DestroyRenderer) {
-            if (!renderer) {
-                throw std::runtime_error(SDL_GetError());
-            }
-        }
+        Renderer(SDL_Window* window, int index = -1, Uint32 flags = SDL_RENDERER_ACCELERATED);
 
 
-        SDL_Renderer* get() const { return renderer.get(); }
+        SDL_Renderer* get();
 
         void clear();
 

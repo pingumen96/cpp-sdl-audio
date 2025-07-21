@@ -22,7 +22,7 @@ int main() {
         core::Window window("Hello SDL", 100, 100, 800, 600);
         core::Renderer renderer(window.get());
 
-        game::Game game;
+        game::Game game(window);
 
         game.init();
 

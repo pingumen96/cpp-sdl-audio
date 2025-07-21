@@ -45,6 +45,9 @@ src/game/player_state/DuckingState.cpp
 src/game/state/MenuState.cpp
 src/game/state/PlayingState.cpp
 src/game/state/PausedState.cpp
+src/game/Game.cpp
+src/core/Renderer.cpp
+src/core/Window.cpp
 )
 
 set_target_properties(sdl_app PROPERTIES
