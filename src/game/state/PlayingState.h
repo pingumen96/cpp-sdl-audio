@@ -14,7 +14,7 @@ namespace game {
     class Game;
     class PlayingState : public GameState {
     public:
-        PlayingState(core::Renderer& renderer);
+        PlayingState();
         virtual ~PlayingState();
 
 
@@ -24,6 +24,5 @@ namespace game {
         void render(Game& game) override;
 
     private:
-        gfx::Texture backgroundTexture; // Example texture for background
     };
 }

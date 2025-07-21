@@ -5,7 +5,7 @@
 #include "../state/PausedState.h"
 
 
-game::PlayingState::PlayingState(core::Renderer& renderer) : backgroundTexture(renderer.get(), "data/preview.png") {} // Example texture for background
+game::PlayingState::PlayingState() {} // Example texture for background
 
 game::PlayingState::~PlayingState() = default;
 
@@ -27,10 +27,12 @@ void game::PlayingState::update(Game& game, float dt) {
 void game::PlayingState::render(Game& game) {
     // render normale
 
-    // image load example
+    // make red screen
     core::Renderer& renderer = game.getRenderer();
     renderer.clear();
-    SDL_RenderCopy(renderer.get(), backgroundTexture.get(), nullptr, nullptr);
+    renderer.setDrawColor(255, 0, 0, 255); // red background
+    SDL_Rect rect = { 0, 0, 800, 600 }; // Assuming window size is 800x600
+    SDL_RenderFillRect(renderer.get(), &rect);
     renderer.present();
 
     // end image load example

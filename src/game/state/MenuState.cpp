@@ -18,7 +18,7 @@ void game::MenuState::handleEvent(game::Game& game, const SDL_Event& ev) {
         case SDLK_RETURN:
         case SDLK_KP_ENTER:
             if (entries[selected] == "Start") {
-                game.setState<game::PlayingState>(game.getRenderer());
+                game.setState<game::PlayingState>();
             } else if (entries[selected] == "Quit") {
                 SDL_Event quit;
                 quit.type = SDL_QUIT;
