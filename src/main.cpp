@@ -1,7 +1,7 @@
 #define SDL_MAIN_HANDLED  // disabilita il wrapping di SDL_main
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
-#include <windows.h>
+
 
 #include <chrono>
 #include <iostream>
