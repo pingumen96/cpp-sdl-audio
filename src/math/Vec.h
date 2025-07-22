@@ -309,6 +309,24 @@ namespace math {
         return r;
     }
 
+    /*================ global utility functions =================*/
+
+    template <std::size_t N, Arithmetic T>
+    /**
+     * @brief Prodotto scalare globale tra due vettori.
+     */
+    [[nodiscard]] constexpr T dot(const Vec<N, T>& a, const Vec<N, T>& b) noexcept {
+        return a.dot(b);
+    }
+
+    template <std::size_t N, Arithmetic T>
+    /**
+     * @brief Normalizza un vettore.
+     */
+    [[nodiscard]] constexpr Vec<N, T> normalize(const Vec<N, T>& v) {
+        return v.normalized();
+    }
+
     /*================ handy aliases =================*/
     template <Arithmetic T> using Vec2 = Vec<2, T>;
     template <Arithmetic T> using Vec3 = Vec<3, T>;

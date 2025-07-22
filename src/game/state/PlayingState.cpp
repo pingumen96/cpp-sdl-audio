@@ -29,10 +29,8 @@ void game::PlayingState::render(Game& game) {
 
     // make red screen
     core::Renderer& renderer = game.getRenderer();
+    renderer.setDrawColor(1.0f, 0.0f, 0.0f, 1.0f); // red background
     renderer.clear();
-    renderer.setDrawColor(255, 0, 0, 255); // red background
-    SDL_Rect rect = { 0, 0, 800, 600 }; // Assuming window size is 800x600
-    SDL_RenderFillRect(renderer.get(), &rect);
     renderer.present();
 
     // end image load example

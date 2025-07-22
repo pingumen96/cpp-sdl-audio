@@ -28,6 +28,8 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 
 
 add_executable(sdl_app
@@ -46,8 +48,10 @@ src/game/state/MenuState.cpp
 src/game/state/PlayingState.cpp
 src/game/state/PausedState.cpp
 src/game/Game.cpp
+src/core/GLContext.cpp
 src/core/Renderer.cpp
 src/core/Window.cpp
+src/gfx/Texture.cpp
 )
 
 set_target_properties(sdl_app PROPERTIES
@@ -72,7 +76,7 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 
 
 
-target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static SDL2_ttf::SDL2_ttf-static nlohmann_json::nlohmann_json)
+target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static SDL2_ttf::SDL2_ttf-static nlohmann_json::nlohmann_json OpenGL::GL GLEW::GLEW)
 
 
 add_executable(sdl_appTests src/tests/main_test.cpp)

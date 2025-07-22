@@ -1,9 +1,13 @@
 #include "Window.h"
 
-core::Window::Window(const char* title, int x, int y, int w, int h, Uint32 flags) : window(SDL_CreateWindow(title, x, y, w, h, flags), SDL_DestroyWindow) {
+core::Window::Window(const char* title, int x, int y, int w, int h, Uint32 flags)
+    : window(SDL_CreateWindow(title, x, y, w, h, flags), SDL_DestroyWindow) {
     if (!window) {
         throw std::runtime_error(SDL_GetError());
     }
+
+    // Create OpenGL context
+    glContext = std::make_unique<GLContext>(window.get());
 }
 
 core::Window::Window(const std::string& title, int x, int y, int w, int h, Uint32 flags)

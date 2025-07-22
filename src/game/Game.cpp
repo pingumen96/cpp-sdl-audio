@@ -11,11 +11,11 @@
 #include "state/PausedState.h"
 
 game::Game::Game(core::Window& window)
-    : renderer(window.get()),
+    : renderer(window),
     state(nullptr),
     inputHandler(nullptr),
     avatar() {
-    // Inizializza il renderer
+    // Inizializza il renderer OpenGL
 }
 game::Game::~Game() = default;
 

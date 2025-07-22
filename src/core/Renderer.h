@@ -1,26 +1,41 @@
 #pragma once
 
-// src/core/Renderer.h – Renderer wrapper for SDL2
-#include <SDL2/SDL.h>
+// src/core/Renderer.h – OpenGL Renderer wrapper
+#include <GL/glew.h>
+#include "../math/Matrix.h"
 
 #include <memory>
 #include <stdexcept>
 
 namespace core {
+    class Window;
+
     class Renderer {
-        std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> renderer;
+    private:
+        Window* window;
+        math::Mat4 projectionMatrix;
+        math::Mat4 viewMatrix;
+
+        // Viewport dimensions
+        int viewportWidth, viewportHeight;
 
     public:
-        Renderer(SDL_Window* window, int index = -1, Uint32 flags = SDL_RENDERER_ACCELERATED);
+        Renderer(Window& window);
 
-
-        SDL_Renderer* get();
-
+        // Basic rendering operations
         void clear();
-
         void present();
+        void setDrawColor(float r, float g, float b, float a);
 
-        void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+        // Viewport management
+        void setViewport(int x, int y, int width, int height);
+        void getViewportSize(int& width, int& height) const;
+
+        // Matrix operations
+        void setProjectionMatrix(const math::Mat4& projection);
+        void setViewMatrix(const math::Mat4& view);
+        const math::Mat4& getProjectionMatrix() const { return projectionMatrix; }
+        const math::Mat4& getViewMatrix() const { return viewMatrix; }
 
         // Prevent copy
         Renderer(const Renderer&) = delete;

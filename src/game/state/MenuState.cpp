@@ -1,5 +1,6 @@
 #include "MenuState.h"
 #include "../Game.h"
+#include "../../core/Renderer.h"
 
 #include <SDL2/SDL.h>
 #include <iostream>
@@ -31,7 +32,10 @@ void game::MenuState::handleEvent(game::Game& game, const SDL_Event& ev) {
 
 void game::MenuState::render(Game& game) {
     // placeholder rendering logic
-
+    core::Renderer& renderer = game.getRenderer();
+    renderer.setDrawColor(0.0f, 0.0f, 1.0f, 1.0f); // blue background for menu
+    renderer.clear();
+    renderer.present();
 }
 
 

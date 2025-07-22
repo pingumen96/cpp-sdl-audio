@@ -3,6 +3,7 @@
 #include "MenuState.h"
 
 #include "../Game.h"
+#include "../../core/Renderer.h"
 
 #include <SDL2/SDL.h>
 #include <iostream>
@@ -21,10 +22,8 @@ void game::PausedState::render(Game& game) {
     // Render overlay (qui simulato)
     // make blue screen
     core::Renderer& renderer = game.getRenderer();
+    renderer.setDrawColor(0.0f, 0.0f, 1.0f, 0.5f); // semi-transparent blue
     renderer.clear();
-    renderer.setDrawColor(0, 0, 255, 128); // semi-transparent blue
-    SDL_Rect rect = { 0, 0, 800, 600 }; // Assuming window size is 800x600
-    SDL_RenderFillRect(renderer.get(), &rect);
     renderer.present();
     std::cout << "[PausedState] Rendering paused overlay\n";
 }
