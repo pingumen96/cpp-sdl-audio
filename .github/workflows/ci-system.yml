@@ -1,0 +1,109 @@
+name: CI Tests (System Libraries)
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            pkg-config \
+            ninja-build \
+            gcc \
+            g++ \
+            make \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libglew-dev \
+            libnlohmann-json3-dev \
+            xvfb
+
+      - name: Create minimal CMakeLists for testing
+        run: |
+          cat > CMakeLists_minimal.txt << 'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(sdl_app_test LANGUAGES CXX)
+
+          set(CMAKE_CXX_STANDARD 20)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+          # Find packages
+          find_package(PkgConfig REQUIRED)
+          pkg_check_modules(SDL2 REQUIRED sdl2)
+          pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
+          pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
+          pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
+          find_package(OpenGL REQUIRED)
+          find_package(GLEW REQUIRED)
+          find_package(nlohmann_json REQUIRED)
+
+          # Include Catch2 (header-only)
+          include(FetchContent)
+          FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG v3.8.1
+          )
+          FetchContent_MakeAvailable(Catch2)
+
+          # Test executable (only the math tests, no SDL dependencies)
+          add_executable(matrix_tests
+            src/tests/main_test.cpp
+          )
+
+          target_include_directories(matrix_tests PRIVATE
+            src/
+            ${CMAKE_CURRENT_SOURCE_DIR}
+          )
+
+          target_link_libraries(matrix_tests
+            Catch2::Catch2WithMain
+          )
+
+          target_compile_features(matrix_tests PRIVATE cxx_std_20)
+          EOF
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++ \
+            -f CMakeLists_minimal.txt
+
+      - name: Build Tests
+        run: cmake --build build --target matrix_tests
+
+      - name: Run Tests
+        run: |
+          cd build
+          ./matrix_tests --reporter=junit --out=../test-results.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results.xml
+          check_name: "Matrix4 Unit Tests (System Libs)"
+          comment_title: "🧮 Matrix4 Unit Test Results"
