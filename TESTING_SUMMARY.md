@@ -20,7 +20,7 @@
 
 ### 3. **Fix delle Convention OpenGL**
 - ✅ **Coordinate system**: Right-handed confermato
-- ✅ **Matrix layout**: Column-major verificato  
+- ✅ **Matrix layout**: Column-major verificato
 - ✅ **Rotazioni**: Counter-clockwise (standard OpenGL)
 - ✅ **Proiezioni**: Perspective matrix corretta
 
@@ -42,7 +42,7 @@
 # Test build
 cmake --build build --target sdl_appTests
 
-# Test execution  
+# Test execution
 ./build/sdl_appTests.exe --reporter=console
 ```
 
@@ -71,7 +71,7 @@ TEST_CASE("Matrix4 Construction", "[Matrix4]") {
 
 Il progetto ora ha:
 - Sistema di testing robusto e completo
-- CI/CD automatizzato 
+- CI/CD automatizzato
 - Badge di stato per mostrare la qualità
 - Scripts per testing locale
 - Documentazione aggiornata
