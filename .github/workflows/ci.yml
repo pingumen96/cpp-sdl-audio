@@ -2,68 +2,68 @@ name: CI Tests
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [master, main]
   pull_request:
-    branches: [ master, main ]
+    branches: [master, main]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          cmake \
-          pkg-config \
-          gcc \
-          g++ \
-          make \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          libgl1-mesa-dev \
-          libglu1-mesa-dev \
-          libglew-dev \
-          libnlohmann-json3-dev \
-          xvfb
-    
-    - name: Configure CMake (System Libraries)
-      run: |
-        cmake -S . -B build \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=gcc \
-          -DCMAKE_CXX_COMPILER=g++
-    
-    - name: Build Tests
-      run: cmake --build build --target sdl_appTests
-    
-    - name: Run Tests
-      run: |
-        cd build
-        xvfb-run -a ./sdl_appTests --reporter=junit --out=../test-results.xml
-    
-    - name: Build Application (if tests pass)
-      run: cmake --build build --target sdl_app
-    
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        files: test-results.xml
-        check_name: "Matrix4 Unit Tests"
-        comment_title: "🧮 Matrix4 Unit Test Results"
-        
-    - name: Upload test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: test-results
-        path: |
-          test-results.xml
-          build/sdl_appTests
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            pkg-config \
+            gcc \
+            g++ \
+            make \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libglew-dev \
+            libnlohmann-json3-dev \
+            xvfb
+
+      - name: Configure CMake (System Libraries)
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++
+
+      - name: Build Tests
+        run: cmake --build build --target sdl_appTests
+
+      - name: Run Tests
+        run: |
+          cd build
+          xvfb-run -a ./sdl_appTests --reporter=junit --out=../test-results.xml
+
+      - name: Build Application (if tests pass)
+        run: cmake --build build --target sdl_app
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results.xml
+          check_name: "Matrix4 Unit Tests"
+          comment_title: "🧮 Matrix4 Unit Test Results"
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            test-results.xml
+            build/sdl_appTests
