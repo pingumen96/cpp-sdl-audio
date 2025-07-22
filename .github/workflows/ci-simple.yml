@@ -35,17 +35,8 @@ jobs:
             libgl1-mesa-dev \
             libglu1-mesa-dev \
             libglew-dev \
+            libnlohmann-json3-dev \
             xvfb
-
-      - name: Install nlohmann-json (header-only)
-        run: |
-          # Try system package first, fallback to manual install
-          sudo apt-get install -y nlohmann-json3-dev || {
-            echo "System package not found, installing manually..."
-            wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp
-            sudo mkdir -p /usr/local/include/nlohmann
-            sudo mv json.hpp /usr/local/include/nlohmann/json.hpp
-          }
 
       - name: Configure CMake (System Libraries)
         run: |
@@ -74,7 +65,7 @@ jobs:
           comment_title: "🧮 Matrix4 Unit Test Results"
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: test-results

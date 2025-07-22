@@ -7,8 +7,8 @@ on:
     branches: [master, main]
 
 permissions:
-  contents: read
   checks: write
+  contents: read
   pull-requests: write
 
 jobs:
