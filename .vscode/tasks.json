@@ -61,6 +61,35 @@
                 "reveal": "always",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "Run Tests (Detailed)",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/sdl_appTests.exe",
+            "args": [
+                "--reporter=console",
+                "--success"
+            ],
+            "group": "test",
+            "dependsOn": "CMake Build Tests",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "Local Test CI Simulation",
+            "type": "shell",
+            "command": "${workspaceFolder}/test_local.bat",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
         }
 
     ]

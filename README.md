@@ -1,5 +1,7 @@
 # Progetto C++ SDL2 + OpenGL
 
+[![CI Tests](https://github.com/pingumen96/cpp-sdl-audio/actions/workflows/ci.yml/badge.svg)](https://github.com/pingumen96/cpp-sdl-audio/actions/workflows/ci.yml)
+
 Questo progetto è una sandbox che mi permette di sperimentare con C++ e SDL2 nel contesto dello sviluppo di videogames, ora migrato per utilizzare **OpenGL** per il rendering moderno.
 
 ## Architettura
@@ -11,7 +13,7 @@ Allo stato attuale, vengono implementati i pattern State e Command per la gestio
 - **Pattern State**: Stati di gioco (Menu, Playing, Paused) e stati del player (Standing, Jumping, Ducking)
 - **Pattern Command**: Sistema di input flessibile con comandi mappabili
 - **Rendering OpenGL**: Renderer moderno basato su OpenGL 3.3+
-- **Sistema Matematico Custom**: Vettori e matrici 4x4 header-only per grafica
+- **Sistema Matematico Custom**: Vettori e matrici 4x4 header-only per grafica con unit test completi
 - **Sistema Audio**: Supporto per effetti sonori e musica (SDL_mixer)
 
 ## Tecnologie Utilizzate
@@ -116,3 +118,32 @@ math::Mat4 model = math::Mat4::translation(x, y, z) * math::Mat4::scale(2.0f);
 // Trasformazioni
 math::Vec3f result = matrix * vector;
 ```
+
+## Unit Testing
+
+Il progetto include un **sistema completo di unit testing** per garantire la qualità del codice:
+
+### Framework di Testing
+- **Catch2**: Framework moderno per unit testing in C++
+- **Copertura completa**: 112 asserzioni in 9 test case per il sistema matematico
+- **CI/CD**: Test automatici ad ogni push su GitHub Actions
+
+### Esecuzione dei Test
+```bash
+# Build dei test
+cmake --build build --target sdl_appTests
+
+# Esecuzione
+./build/sdl_appTests.exe
+```
+
+### Test Coverage del Sistema Math
+- **Costruzione matrici**: Default, diagonale, copia
+- **Operazioni aritmetiche**: Addizione, sottrazione, moltiplicazione
+- **Trasformazioni**: Scaling, rotazione (X/Y/Z), traslazione
+- **Proiezioni**: Ortografica e prospettica
+- **Utility**: Trasposta, operatori di confronto
+- **Edge cases**: Valori zero, grandi, negativi
+- **Trasformazioni combinate**: Pipeline complete
+
+I test garantiscono la correttezza delle convenzioni OpenGL (coordinate right-handed, matrici column-major, rotazioni counter-clockwise).
