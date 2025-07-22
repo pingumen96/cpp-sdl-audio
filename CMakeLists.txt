@@ -27,7 +27,20 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
-find_package(nlohmann_json REQUIRED)
+
+# Try to find nlohmann_json, with fallback for system packages
+find_package(nlohmann_json QUIET)
+if(NOT nlohmann_json_FOUND)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(NLOHMANN_JSON nlohmann_json)
+        if(NLOHMANN_JSON_FOUND)
+            add_library(nlohmann_json::nlohmann_json INTERFACE IMPORTED)
+            target_include_directories(nlohmann_json::nlohmann_json INTERFACE ${NLOHMANN_JSON_INCLUDE_DIRS})
+        endif()
+    endif()
+endif()
+
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
@@ -54,15 +67,10 @@ src/core/Window.cpp
 src/gfx/Texture.cpp
 )
 
-set_target_properties(sdl_app PROPERTIES
-    LINK_FLAGS "-mconsole"
-)
-
 target_include_directories(sdl_app
 PRIVATE
 ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-
 
 string(REPLACE "\\" "/" PROJECT_SRC_ESC "${CMAKE_SOURCE_DIR}")
 target_compile_definitions(sdl_app PRIVATE
@@ -74,9 +82,36 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 "${CMAKE_SOURCE_DIR}/data"
 "$<TARGET_FILE_DIR:sdl_app>/data")
 
+# Platform-specific settings
+if(WIN32)
+    set_target_properties(sdl_app PROPERTIES
+        LINK_FLAGS "-mconsole"
+    )
+    # Windows-specific SDL2 linking (static libraries from vcpkg)
+    target_link_libraries(sdl_app PRIVATE 
+        SDL2::SDL2 
+        SDL2_image::SDL2_image-static 
+        SDL2_mixer::SDL2_mixer-static 
+        SDL2_ttf::SDL2_ttf-static 
+        OpenGL::GL 
+        GLEW::GLEW
+    )
+else()
+    # Linux-specific SDL2 linking (shared libraries)
+    target_link_libraries(sdl_app PRIVATE 
+        SDL2::SDL2 
+        SDL2_image::SDL2_image 
+        SDL2_mixer::SDL2_mixer 
+        SDL2_ttf::SDL2_ttf 
+        OpenGL::GL 
+        GLEW::GLEW
+    )
+endif()
 
-
-target_link_libraries(sdl_app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static SDL2_ttf::SDL2_ttf-static nlohmann_json::nlohmann_json OpenGL::GL GLEW::GLEW)
+# Link nlohmann_json if found
+if(TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(sdl_app PRIVATE nlohmann_json::nlohmann_json)
+endif()
 
 
 add_executable(sdl_appTests src/tests/main_test.cpp)

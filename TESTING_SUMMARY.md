@@ -25,9 +25,10 @@
 - ✅ **Proiezioni**: Perspective matrix corretta
 
 ### 4. **Integrazione CI/CD**
-- ✅ **GitHub Actions**: Workflow automatico configurato
-- ✅ **Badge README**: Status dei test visibile
+- ✅ **GitHub Actions**: Workflow automatico configurato per Linux
+- ✅ **Badge README**: Status dei test visibile  
 - ✅ **Multi-platform**: Linux (CI) + Windows (dev)
+- ✅ **System Libraries**: Usa librerie di sistema su Linux per evitare problemi vcpkg
 - ✅ **Artifacts**: Test results e report salvati
 
 ### 5. **Developer Experience**
@@ -48,8 +49,9 @@ cmake --build build --target sdl_appTests
 
 ### CI Workflow
 - **Trigger**: Push/PR su master/main
-- **Environment**: Ubuntu Latest + vcpkg
-- **Steps**: Dependencies → Configure → Build → Test → Report
+- **Environment**: Ubuntu Latest + librerie di sistema (no vcpkg)
+- **Dependencies**: SDL2, OpenGL, GLEW, nlohmann-json via apt
+- **Steps**: Dependencies → Configure → Build Tests → Run Tests → Build App → Report
 - **Outputs**: JUnit XML + GitHub annotations
 
 ### Test Structure
