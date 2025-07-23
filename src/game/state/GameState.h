@@ -14,5 +14,10 @@ namespace game {
         virtual void handleEvent(Game& game, const SDL_Event& ev) {}
         virtual void update(Game& game, float dt) {}
         virtual void render(Game& game) {}
+
+        virtual void render(Game& game, float interpolation) {
+            // Default: ignore interpolation and use normal render
+            render(game);
+        }
     };
 }

@@ -1,6 +1,7 @@
 #include "Game.h"
 
 #include <iostream>
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "../core/Renderer.h"
@@ -28,8 +29,8 @@ void game::Game::init() {
 }
 
 void game::Game::mainLoop() {
-    constexpr Uint32 FPS = 60;
-    constexpr float FIXED_TIMESTEP = 1.0f / FPS; // 16.67ms
+    constexpr Uint32 LOGIC_FPS = 60;
+    constexpr float FIXED_TIMESTEP = 1.0f / LOGIC_FPS; // 16.67ms per la logica
     constexpr float MAX_FRAME_TIME = 0.05f; // 50ms max per evitare spiral of death
 
     Uint64 performanceFrequency = SDL_GetPerformanceFrequency();
@@ -42,14 +43,14 @@ void game::Game::mainLoop() {
         float frameTime = static_cast<float>(currentCounter - lastCounter) / static_cast<float>(performanceFrequency);
         lastCounter = currentCounter;
 
-        // Previene spiral of death limitando il frame time massimo
+        // avoid spiral of death by capping frame time
         if (frameTime > MAX_FRAME_TIME) {
             frameTime = MAX_FRAME_TIME;
         }
 
         accumulator += frameTime;
 
-        // --- input handling ---
+        // --- INPUT HANDLING ---
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -59,25 +60,33 @@ void game::Game::mainLoop() {
             }
         }
 
-        // --- Fixed timestep updates ---
+        // --- LOGIC UPDATE (fixed timestep) ---
+        bool didUpdate = false;
         while (accumulator >= FIXED_TIMESTEP) {
             if (state) {
                 state->update(*this, FIXED_TIMESTEP);
+                didUpdate = true;
             }
             accumulator -= FIXED_TIMESTEP;
         }
 
-        // --- Rendering ---
-        if (state) {
-            state->render(*this);
+        // --- RENDERING (variable framerate with interpolation) ---
+        if (state && didUpdate) {
+            // how much time has passed since the last logical update
+            float interpolation = accumulator / FIXED_TIMESTEP;
+
+            // clamp the interpolation between 0 and 1 for safety
+            interpolation = std::clamp(interpolation, 0.0f, 1.0f);
+
+            state->render(*this, interpolation);
+
+            didUpdate = false; // reset for the next cycle
         } else {
             std::cerr << "[Game] No active state to render!\n";
         }
 
-        // --- VSync o frame limiting ---
-        // Rimuoviamo SDL_Delay e lasciamo che VSync gestisca il timing
-        // Se VSync non è abilitato, potremmo aggiungere un piccolo delay
-        SDL_Delay(1); // Piccolo delay per non saturare la CPU
+        // little delay to avoid maxing out the CPU
+        SDL_Delay(1);
     }
 }
 
