@@ -71,7 +71,15 @@ src/game/Game.cpp
 src/core/GLContext.cpp
 src/core/Renderer.cpp
 src/core/Window.cpp
-src/gfx/Texture.cpp
+# Resource Management System
+src/resources/IFileSystem.cpp
+src/resources/LoaderFactory.cpp
+src/resources/ResourceRegistry.cpp
+src/resources/ResourceManager.cpp
+src/resources/types/TextureResource.cpp
+src/resources/types/MeshResource.cpp
+src/resources/loaders/TextureLoaders.cpp
+src/resources/loaders/MeshLoaders.cpp
 )
 
 target_include_directories(sdl_app
@@ -95,22 +103,22 @@ if(WIN32)
         LINK_FLAGS "-mconsole"
     )
     # Windows-specific SDL2 linking (static libraries from vcpkg)
-    target_link_libraries(sdl_app PRIVATE 
-        SDL2::SDL2 
-        SDL2_image::SDL2_image-static 
-        SDL2_mixer::SDL2_mixer-static 
-        SDL2_ttf::SDL2_ttf-static 
-        OpenGL::GL 
+    target_link_libraries(sdl_app PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image-static
+        SDL2_mixer::SDL2_mixer-static
+        SDL2_ttf::SDL2_ttf-static
+        OpenGL::GL
         GLEW::GLEW
     )
 else()
     # Linux-specific SDL2 linking (shared libraries)
-    target_link_libraries(sdl_app PRIVATE 
-        SDL2::SDL2 
-        SDL2_image::SDL2_image 
-        SDL2_mixer::SDL2_mixer 
-        SDL2_ttf::SDL2_ttf 
-        OpenGL::GL 
+    target_link_libraries(sdl_app PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image
+        SDL2_mixer::SDL2_mixer
+        SDL2_ttf::SDL2_ttf
+        OpenGL::GL
         GLEW::GLEW
     )
 endif()
@@ -121,9 +129,43 @@ if(TARGET nlohmann_json::nlohmann_json)
 endif()
 
 
-add_executable(sdl_appTests src/tests/main_test.cpp)
+add_executable(sdl_appTests
+src/tests/main_test.cpp
+src/tests/resource_system_test.cpp
+src/tests/filesystem_normalize_test.cpp
+# Resource Management System (for tests)
+src/resources/IFileSystem.cpp
+src/resources/LoaderFactory.cpp
+src/resources/ResourceRegistry.cpp
+src/resources/ResourceManager.cpp
+src/resources/types/TextureResource.cpp
+src/resources/types/MeshResource.cpp
+src/resources/loaders/TextureLoaders.cpp
+src/resources/loaders/MeshLoaders.cpp
+)
 
 target_link_libraries(sdl_appTests PRIVATE Catch2::Catch2WithMain)
+
+# Add the same libraries as the main app for resource system tests
+if(WIN32)
+    target_link_libraries(sdl_appTests PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image-static
+        SDL2_mixer::SDL2_mixer-static
+        SDL2_ttf::SDL2_ttf-static
+        OpenGL::GL
+        GLEW::GLEW
+    )
+else()
+    target_link_libraries(sdl_appTests PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image
+        SDL2_mixer::SDL2_mixer
+        SDL2_ttf::SDL2_ttf
+        OpenGL::GL
+        GLEW::GLEW
+    )
+endif()
 
 add_test(sdl_appTests
   NAME sdl_appTests

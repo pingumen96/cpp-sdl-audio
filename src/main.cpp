@@ -12,7 +12,6 @@
 #include "core/Surface.h"
 #include "core/Sdl.h"
 #include "core/Window.h"
-#include "gfx/Texture.h"
 #include "game/Game.h"
 
 int main() {

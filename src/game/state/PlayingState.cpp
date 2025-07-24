@@ -1,7 +1,6 @@
 #include "PlayingState.h"
 #include "../Game.h"
 #include "../../core/Renderer.h"
-#include "../../gfx/Texture.h"
 #include "../state/PausedState.h"
 
 

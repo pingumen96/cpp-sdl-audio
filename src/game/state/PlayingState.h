@@ -2,7 +2,6 @@
 #pragma once
 
 #include "GameState.h"
-#include "../../gfx/Texture.h"
 
 namespace core {        // OK
     class Window;
