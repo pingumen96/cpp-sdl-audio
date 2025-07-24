@@ -49,13 +49,35 @@ namespace resources {
 
     std::string StandardFileSystem::normalize(const std::string& path) const {
         try {
-            auto normalized = std::filesystem::path(path).lexically_normal();
+            // First convert all backslashes to forward slashes
+            std::string workingPath = path;
+            std::replace(workingPath.begin(), workingPath.end(), '\\', '/');
+
+            // Use filesystem path for normalization
+            auto normalized = std::filesystem::path(workingPath).lexically_normal();
             std::string result = normalized.string();
 
-            // Convert backslashes to forward slashes for consistency
+            // Convert any remaining backslashes to forward slashes (Windows compatibility)
             std::replace(result.begin(), result.end(), '\\', '/');
 
-            return result;
+            // Remove duplicate slashes
+            std::string cleaned;
+            cleaned.reserve(result.size());
+            bool lastWasSlash = false;
+
+            for (char c : result) {
+                if (c == '/') {
+                    if (!lastWasSlash) {
+                        cleaned += c;
+                        lastWasSlash = true;
+                    }
+                } else {
+                    cleaned += c;
+                    lastWasSlash = false;
+                }
+            }
+
+            return cleaned;
         } catch (const std::exception&) {
             return path; // Return original path if normalization fails
         }

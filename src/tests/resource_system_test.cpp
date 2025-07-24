@@ -82,7 +82,9 @@ TEST_CASE("FileSystem basic operations", "[resources][filesystem]") {
 
     SECTION("Check existing file") {
         // Test with a file that should exist in the project
-        REQUIRE(fs.exists("CMakeLists.txt") == true);
+        // In CI/CD tests run from build/ directory, so use relative path
+        bool foundCMake = fs.exists("CMakeLists.txt") || fs.exists("../CMakeLists.txt");
+        REQUIRE(foundCMake == true);
         REQUIRE(fs.exists("nonexistent_file.xyz") == false);
     }
 }
