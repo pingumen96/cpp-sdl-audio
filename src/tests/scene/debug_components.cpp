@@ -19,12 +19,12 @@ TEST_CASE("Step 1 - Basic ECS Include", "[debug]") {
 
 TEST_CASE("Step 2 - Math Vec Include", "[debug]") {
     std::cout << "Step 2: Testing math Vec include..." << std::endl;
-    
-    Vec3f testVec{1.0f, 2.0f, 3.0f};
+
+    Vec3f testVec{ 1.0f, 2.0f, 3.0f };
     std::cout << "Vec3f created successfully: (" << testVec.x() << ", " << testVec.y() << ", " << testVec.z() << ")" << std::endl;
-    
+
     REQUIRE(testVec.x() == 1.0f);
-    REQUIRE(testVec.y() == 2.0f); 
+    REQUIRE(testVec.y() == 2.0f);
     REQUIRE(testVec.z() == 3.0f);
 }
 
@@ -36,21 +36,21 @@ TEST_CASE("Step 3 - CommonComponents Include", "[debug]") {
 
 TEST_CASE("Step 4 - Individual Component Creation", "[debug]") {
     std::cout << "Step 4: Testing individual component creation..." << std::endl;
-    
+
     // Test Transform component
     std::cout << "Creating Transform..." << std::endl;
     Transform transform;
     std::cout << "Transform created successfully" << std::endl;
-    
+
     // Test Velocity component
     std::cout << "Creating Velocity..." << std::endl;
     Velocity velocity;
     std::cout << "Velocity created successfully" << std::endl;
-    
+
     // Test Renderable component
     std::cout << "Creating Renderable..." << std::endl;
     Renderable renderable;
     std::cout << "Renderable created successfully" << std::endl;
-    
+
     REQUIRE(true);
 }
