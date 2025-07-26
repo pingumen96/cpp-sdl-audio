@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "../../scene/SceneSystem.h"
-#include "../../scene/examples/TestScenes.h"
+#include "../../scene/examples/SimpleTestScene.h"
 #include "../../ecs/components/CommonComponents.h"
 #include "../../scene/systems/TransformSyncSystem.h"
 #include "../../ecs/ECS.h"
@@ -70,13 +70,13 @@ TEST_CASE("OnAttach Debug - Step by Step", "[onattach]") {
         auto coordinator = createTestCoordinator();
         
         REQUIRE_NOTHROW([&]() {
-            TestScene scene;
+            SimpleTestScene scene;
         }());
     }
     
     SECTION("Step 6: Manual onAttach simulation") {
-        auto coordinator = createTestCoordinator();
-        TestScene scene;
+        SimpleTestScene scene;
+        auto* coordinator = scene.getCoordinator(); // Use scene's coordinator
         
         // Let's manually do what onAttach does step by step
         std::shared_ptr<TransformSyncSystem> transformSystem;
@@ -99,7 +99,7 @@ TEST_CASE("OnAttach Debug - Step by Step", "[onattach]") {
         
         // Set coordinator in the system
         REQUIRE_NOTHROW([&]() {
-            transformSystem->setCoordinator(coordinator.get());
+            transformSystem->setCoordinator(coordinator);
         }());
     }
 }

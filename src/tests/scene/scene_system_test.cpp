@@ -1,4 +1,5 @@
 #include "../../scene/SceneSystem.h"
+#include "../../scene/examples/SimpleTestScene.h"
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
@@ -33,7 +34,7 @@ TEST_CASE("Scene System - Basic Scene Creation", "[scene][basic]") {
         REQUIRE(sceneManager != nullptr);
 
         // Create and push a test scene
-        auto testScene = std::make_unique<TestScene>();
+        auto testScene = std::make_unique<SimpleTestScene>();
         std::string sceneName = testScene->getName();
 
         sceneManager->pushScene(std::move(testScene));
@@ -50,7 +51,7 @@ TEST_CASE("Scene System - Basic Scene Creation", "[scene][basic]") {
         auto sceneManager = createDefaultSceneManager();
 
         // Push multiple scenes
-        auto scene1 = std::make_unique<TestScene>();
+        auto scene1 = std::make_unique<SimpleTestScene>();
         scene1->setName("Scene1");
         auto scene2 = std::make_unique<MenuScene>();
         scene2->setName("Scene2");
@@ -126,8 +127,8 @@ TEST_CASE("Scene System - Scene Stack Management", "[scene][stack]") {
     auto sceneManager = createDefaultSceneManager();
 
     SECTION("Push and pop operations") {
-        auto scene1 = std::make_unique<TestScene>();
-        scene1->setName("TestScene1");
+        auto scene1 = std::make_unique<SimpleTestScene>();
+        scene1->setName("SimpleTestScene1");
         auto scene2 = std::make_unique<MenuScene>();
         scene2->setName("MenuScene");
 
@@ -143,7 +144,7 @@ TEST_CASE("Scene System - Scene Stack Management", "[scene][stack]") {
         REQUIRE(poppedScene != nullptr);
         REQUIRE(poppedScene->getName() == "MenuScene");
         REQUIRE(sceneManager->getSceneCount() == 1);
-        REQUIRE(sceneManager->getCurrentScene()->getName() == "TestScene1");
+        REQUIRE(sceneManager->getCurrentScene()->getName() == "SimpleTestScene1");
 
         // Pop last scene
         poppedScene = sceneManager->popScene();
@@ -153,7 +154,7 @@ TEST_CASE("Scene System - Scene Stack Management", "[scene][stack]") {
     }
 
     SECTION("Scene switching") {
-        auto scene1 = std::make_unique<TestScene>();
+        auto scene1 = std::make_unique<SimpleTestScene>();
         scene1->setName("Scene1");
         sceneManager->pushScene(std::move(scene1));
 
@@ -171,7 +172,7 @@ TEST_CASE("Scene System - Scene Stack Management", "[scene][stack]") {
 
     SECTION("Clear all scenes") {
         // Add multiple scenes
-        sceneManager->pushScene(std::make_unique<TestScene>());
+        sceneManager->pushScene(std::make_unique<SimpleTestScene>());
         sceneManager->pushScene(std::make_unique<MenuScene>());
         sceneManager->pushScene(std::make_unique<LoadingScene>());
 
@@ -225,7 +226,7 @@ TEST_CASE("Scene System - Rendering", "[scene][rendering]") {
 
     SECTION("Scene rendering") {
         auto sceneManager = createDefaultSceneManager();
-        auto testScene = std::make_unique<TestScene>();
+        auto testScene = std::make_unique<SimpleTestScene>();
 
         sceneManager->pushScene(std::move(testScene));
 
@@ -235,7 +236,7 @@ TEST_CASE("Scene System - Rendering", "[scene][rendering]") {
 
         // Check render stats
         auto stats = sceneManager->getLastRenderStats();
-        REQUIRE(stats.totalDrawItems > 0); // TestScene should produce draw items
+        REQUIRE(stats.totalDrawItems > 0); // SimpleTestScene should produce draw items
     }
 }
 
@@ -268,7 +269,7 @@ TEST_CASE("Scene System - Resource Management", "[scene][resources]") {
 
     SECTION("Scene resource bundle integration") {
         auto sceneManager = createDefaultSceneManager();
-        auto testScene = std::make_unique<TestScene>();
+        auto testScene = std::make_unique<SimpleTestScene>();
 
         sceneManager->pushScene(std::move(testScene));
 
@@ -277,7 +278,7 @@ TEST_CASE("Scene System - Resource Management", "[scene][resources]") {
 
         // Check resource bundle
         const auto& bundle = currentScene->getResourceBundle();
-        REQUIRE_FALSE(bundle.isEmpty()); // TestScene adds resources
+        REQUIRE_FALSE(bundle.isEmpty()); // SimpleTestScene adds resources
 
         // Check bundle progress
         float progress = currentScene->getResourceBundleProgress(*sceneManager);
@@ -345,7 +346,7 @@ TEST_CASE("Scene System - Update Loop", "[scene][update]") {
 
     SECTION("Scene manager update") {
         auto sceneManager = createDefaultSceneManager();
-        auto testScene = std::make_unique<TestScene>();
+        auto testScene = std::make_unique<SimpleTestScene>();
 
         sceneManager->pushScene(std::move(testScene));
 
@@ -363,7 +364,7 @@ TEST_CASE("Scene System - Update Loop", "[scene][update]") {
 
     SECTION("Transition updates") {
         auto sceneManager = createDefaultSceneManager();
-        auto scene1 = std::make_unique<TestScene>();
+        auto scene1 = std::make_unique<SimpleTestScene>();
         scene1->setName("Scene1");
 
         auto scene2 = std::make_unique<MenuScene>();

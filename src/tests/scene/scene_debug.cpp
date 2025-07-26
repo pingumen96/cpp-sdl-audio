@@ -3,6 +3,7 @@
 
 // Include tutti i file necessari
 #include "../../scene/SceneSystem.h"
+#include "../../scene/examples/SimpleTestScene.h"
 
 using namespace scene;
 using namespace ecs;
@@ -12,8 +13,8 @@ TEST_CASE("Scene Debug - Step 1: Basic Scene Construction", "[scenedebug]") {
     
     // Test solo la costruzione della scene senza scene manager
     try {
-        auto testScene = std::make_unique<TestScene>();
-        std::cout << "TestScene constructed successfully" << std::endl;
+        auto testScene = std::make_unique<SimpleTestScene>();
+        std::cout << "SimpleTestScene constructed successfully" << std::endl;
         
         std::string name = testScene->getName();
         std::cout << "Scene name: " << name << std::endl;
@@ -50,7 +51,7 @@ TEST_CASE("Scene Debug - Step 3: Scene Setup", "[scenedebug]") {
     
     try {
         auto sceneManager = createDefaultSceneManager();
-        auto testScene = std::make_unique<TestScene>();
+        auto testScene = std::make_unique<SimpleTestScene>();
         
         std::cout << "Both objects created successfully" << std::endl;
         
@@ -69,7 +70,7 @@ TEST_CASE("Scene Debug - Step 4: pushScene Call", "[scenedebug]") {
     
     try {
         auto sceneManager = createDefaultSceneManager();
-        auto testScene = std::make_unique<TestScene>();
+        auto testScene = std::make_unique<SimpleTestScene>();
         
         std::cout << "About to call pushScene..." << std::endl;
         

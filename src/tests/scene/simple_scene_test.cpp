@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "../../scene/SceneSystem.h"
-#include "../../scene/examples/TestScenes.h"
+#include "../../scene/examples/SimpleTestScene.h"
 #include "../../ecs/components/CommonComponents.h"
 #include "../../scene/systems/TransformSyncSystem.h"
 #include "../../ecs/ECS.h"
@@ -11,7 +11,7 @@ using namespace ecs;
 TEST_CASE("Simple Scene Test", "[simplescene]") {
     
     SECTION("Step 1: Create Scene and check Transform is registered") {
-        TestScene scene;
+        SimpleTestScene scene;
         
         // At this point, setupSceneComponents() should have been called
         // in the Scene constructor, so Transform should be registered
@@ -23,7 +23,7 @@ TEST_CASE("Simple Scene Test", "[simplescene]") {
     }
     
     SECTION("Step 2: Manual onAttach simulation step by step") {
-        TestScene scene;
+        SimpleTestScene scene;
         auto* coordinator = scene.getCoordinator();
         
         // Verify Transform is registered
@@ -52,7 +52,7 @@ TEST_CASE("Simple Scene Test", "[simplescene]") {
     
     SECTION("Step 3: Call actual onAttach") {
         auto sceneManager = createDefaultSceneManager();
-        TestScene scene;
+        SimpleTestScene scene;
         
         // This should work now
         REQUIRE_NOTHROW([&]() {
