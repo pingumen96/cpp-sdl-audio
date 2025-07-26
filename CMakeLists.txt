@@ -144,6 +144,56 @@ target_include_directories(ecs_demo
 
 # ECS is header-only, so no additional libraries needed for basic demo
 
+# Renderer2D Demo executable
+add_executable(renderer2d_demo
+    src/renderer2d_demo.cpp
+    # Renderer2D System
+    src/scene/rendering/Renderer2D.cpp
+    # Scene Management System
+    src/scene/Scene.cpp
+    src/scene/SceneManager.cpp
+    # Resource Management System
+    src/resources/IFileSystem.cpp
+    src/resources/LoaderFactory.cpp
+    src/resources/ResourceRegistry.cpp
+    src/resources/ResourceManager.cpp
+    src/resources/types/TextureResource.cpp
+    src/resources/types/MeshResource.cpp
+    src/resources/loaders/TextureLoaders.cpp
+    src/resources/loaders/MeshLoaders.cpp
+)
+
+target_include_directories(renderer2d_demo
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# Link required libraries for renderer2d demo
+if(WIN32)
+    target_link_libraries(renderer2d_demo PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image-static
+        SDL2_mixer::SDL2_mixer-static
+        SDL2_ttf::SDL2_ttf-static
+        OpenGL::GL
+        GLEW::GLEW
+    )
+else()
+    target_link_libraries(renderer2d_demo PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image
+        SDL2_mixer::SDL2_mixer
+        SDL2_ttf::SDL2_ttf
+        OpenGL::GL
+        GLEW::GLEW
+    )
+endif()
+
+# Link nlohmann_json if found
+if(TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(renderer2d_demo PRIVATE nlohmann_json::nlohmann_json)
+endif()
+
 # Scene System Demo executable
 add_executable(scene_demo
     src/scene_demo.cpp
@@ -199,6 +249,7 @@ src/tests/resource_system_test.cpp
 src/tests/filesystem_normalize_test.cpp
 src/tests/ecs_test.cpp
 src/tests/math_library_test.cpp
+src/tests/renderer2d_test.cpp
 src/tests/scene/scene_system_test.cpp
 src/tests/scene/simple_test.cpp
 src/tests/scene/minimal_test.cpp
@@ -211,6 +262,8 @@ src/tests/scene/simple_scene_test.cpp
 src/tests/scene/scene_integration_test.cpp
 src/tests/resources/mock_resource_test.cpp
 # src/tests/scene/resource_debug.cpp  # Temporarily disabled due to OpenGL dependency
+# Renderer2D System (for tests)
+src/scene/rendering/Renderer2D.cpp
 # Resource Management System (for tests)
 src/resources/IFileSystem.cpp
 src/resources/LoaderFactory.cpp
