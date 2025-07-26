@@ -1,50 +1,54 @@
 #include "Renderer.h"
 #include "Window.h"
 
-core::Renderer::Renderer(Window& win) : window(&win) {
-    // Get initial viewport size
-    window->getSize(viewportWidth, viewportHeight);
+namespace core {
 
-    // Set initial viewport
-    setViewport(0, 0, viewportWidth, viewportHeight);
+    Renderer::Renderer(Window& window) {
+        // Create and initialize the OpenGL backend
+        backend = std::make_unique<OpenGLBackend>(window);
 
-    // Set up default projection matrix (2D orthographic)
-    projectionMatrix = math::Mat4::ortho(0.0f, static_cast<float>(viewportWidth),
-        static_cast<float>(viewportHeight), 0.0f,
-        -1.0f, 1.0f);
+        // Get window size for initialization
+        int width, height;
+        window.getSize(width, height);
 
-    // Set up identity view matrix
-    viewMatrix = math::Mat4::identity();
+        // Initialize the backend
+        backend->init(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+    }
 
-    // Set default clear color
-    setDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
-}void core::Renderer::clear() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
+    void Renderer::clear() {
+        backend->clear();
+    }
 
-void core::Renderer::present() {
-    window->swapBuffers();
-}
+    void Renderer::present() {
+        backend->present();
+    }
 
-void core::Renderer::setDrawColor(float r, float g, float b, float a) {
-    glClearColor(r, g, b, a);
-}
+    void Renderer::setDrawColor(float r, float g, float b, float a) {
+        backend->setDrawColor(r, g, b, a);
+    }
 
-void core::Renderer::setViewport(int x, int y, int width, int height) {
-    glViewport(x, y, width, height);
-    viewportWidth = width;
-    viewportHeight = height;
-}
+    void Renderer::setViewport(int x, int y, int width, int height) {
+        backend->setViewport(x, y, width, height);
+    }
 
-void core::Renderer::getViewportSize(int& width, int& height) const {
-    width = viewportWidth;
-    height = viewportHeight;
-}
+    void Renderer::getViewportSize(int& width, int& height) const {
+        backend->getViewportSize(width, height);
+    }
 
-void core::Renderer::setProjectionMatrix(const math::Mat4& projection) {
-    projectionMatrix = projection;
-}
+    void Renderer::setProjectionMatrix(const math::Mat4& projection) {
+        backend->setProjectionMatrix(projection);
+    }
 
-void core::Renderer::setViewMatrix(const math::Mat4& view) {
-    viewMatrix = view;
+    void Renderer::setViewMatrix(const math::Mat4& view) {
+        backend->setViewMatrix(view);
+    }
+
+    const math::Mat4& Renderer::getProjectionMatrix() const {
+        return backend->getProjectionMatrix();
+    }
+
+    const math::Mat4& Renderer::getViewMatrix() const {
+        return backend->getViewMatrix();
+    }
+
 }

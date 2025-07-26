@@ -5,6 +5,7 @@
 #include "input/InputHandler.h"
 #include "Avatar.h"
 #include "../core/Renderer.h"
+#include "../scene/SceneSystem.h"
 
 // Qui includi tutte le state complete! (Serve la definizione, non solo fwd)
 #include "state/GameState.h"
@@ -42,11 +43,19 @@ namespace game {
 
         core::Renderer& getRenderer();
 
+        // Scene system integration
+        scene::SceneManager* getSceneManager() const { return sceneManager.get(); }
+
     private:
         std::unique_ptr<GameState> state; // Stato di gioco attivo
         std::unique_ptr<input::InputHandler> inputHandler;
         Avatar avatar; // Il tuo avatar di gioco
         core::Renderer renderer; // Renderer SDL2
+
+        // Scene system
+        std::unique_ptr<scene::SceneManager> sceneManager;
+
+        void initializeSceneSystem();
     };
 
 } // namespace game

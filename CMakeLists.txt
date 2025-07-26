@@ -70,6 +70,7 @@ src/game/state/PausedState.cpp
 src/game/Game.cpp
 src/core/GLContext.cpp
 src/core/Renderer.cpp
+src/core/OpenGLBackend.cpp
 src/core/Window.cpp
 # Resource Management System
 src/resources/IFileSystem.cpp

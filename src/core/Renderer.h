@@ -1,8 +1,8 @@
 #pragma once
 
-// src/core/Renderer.h – OpenGL Renderer wrapper
-#include <GL/glew.h>
-#include "../math/Matrix.h"
+// src/core/Renderer.h – OpenGL Renderer wrapper with scene system integration
+#include "OpenGLBackend.h"
+#include "../scene/rendering/IRenderBackend.h"
 
 #include <memory>
 #include <stdexcept>
@@ -10,19 +10,21 @@
 namespace core {
     class Window;
 
+    /**
+     * @brief Renderer class that wraps OpenGLBackend and provides legacy compatibility
+     *
+     * This class now delegates to OpenGLBackend which implements IRenderBackend.
+     * It provides the same interface as before for backward compatibility while
+     * enabling integration with the scene system.
+     */
     class Renderer {
     private:
-        Window* window;
-        math::Mat4 projectionMatrix;
-        math::Mat4 viewMatrix;
-
-        // Viewport dimensions
-        int viewportWidth, viewportHeight;
+        std::unique_ptr<OpenGLBackend> backend;
 
     public:
         Renderer(Window& window);
 
-        // Basic rendering operations
+        // Basic rendering operations (delegated to backend)
         void clear();
         void present();
         void setDrawColor(float r, float g, float b, float a);
@@ -34,8 +36,12 @@ namespace core {
         // Matrix operations
         void setProjectionMatrix(const math::Mat4& projection);
         void setViewMatrix(const math::Mat4& view);
-        const math::Mat4& getProjectionMatrix() const { return projectionMatrix; }
-        const math::Mat4& getViewMatrix() const { return viewMatrix; }
+        const math::Mat4& getProjectionMatrix() const;
+        const math::Mat4& getViewMatrix() const;
+
+        // Access to the backend for scene system integration
+        OpenGLBackend* getBackend() const { return backend.get(); }
+        scene::IRenderBackend* getRenderBackend() const { return backend.get(); }
 
         // Prevent copy
         Renderer(const Renderer&) = delete;

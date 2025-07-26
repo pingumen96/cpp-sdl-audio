@@ -16,7 +16,8 @@ game::Game::Game(core::Window& window)
     state(nullptr),
     inputHandler(nullptr),
     avatar() {
-    // Inizializza il renderer OpenGL
+    // Initialize the scene system
+    initializeSceneSystem();
 }
 game::Game::~Game() = default;
 
@@ -78,7 +79,14 @@ void game::Game::mainLoop() {
             // clamp the interpolation between 0 and 1 for safety
             interpolation = std::clamp(interpolation, 0.0f, 1.0f);
 
+            // Traditional state-based rendering
             state->render(*this, interpolation);
+
+            // Additionally, if scene manager is available, update and render scenes
+            if (sceneManager) {
+                sceneManager->update(FIXED_TIMESTEP);
+                sceneManager->render();
+            }
 
             didUpdate = false; // reset for the next cycle
         } else {
@@ -92,4 +100,30 @@ void game::Game::mainLoop() {
 
 core::Renderer& game::Game::getRenderer() {
     return renderer;
+}
+
+void game::Game::initializeSceneSystem() {
+    // Initialize component type registry
+    scene::ComponentTypeRegistry::initializeCommonTypes();
+
+    // Get the OpenGL backend from the renderer
+    auto* openGLBackend = renderer.getBackend();
+    if (!openGLBackend) {
+        std::cerr << "[Game] Failed to get OpenGL backend from renderer!" << std::endl;
+        // Fall back to null backend
+        sceneManager = scene::createDefaultSceneManager(800, 600);
+        return;
+    }
+
+    // Since we don't own the backend (it's owned by the renderer), we'll need to use
+    // a different approach. Let's create our own copy of the backend specifically for the scene system.
+    // For now, let's just use the null backend as a safe fallback.
+    sceneManager = scene::createDefaultSceneManager(800, 600);
+
+    if (!sceneManager) {
+        std::cerr << "[Game] Failed to create scene manager!" << std::endl;
+        return;
+    }
+
+    std::cout << "[Game] Scene system initialized successfully (using NullBackend for now)" << std::endl;
 }

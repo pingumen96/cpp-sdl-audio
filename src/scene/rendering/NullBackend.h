@@ -4,6 +4,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef NULLBACKEND_ENABLE_LOGGING
+#define NULLBACKEND_ENABLE_LOGGING 0
+#endif
+
 namespace scene {
 
     /**
@@ -28,8 +32,10 @@ namespace scene {
             this->height = height;
             this->initialized = true;
 
+#if NULLBACKEND_ENABLE_LOGGING
             std::cout << "[NullBackend] Initialized with size: "
                 << width << "x" << height << std::endl;
+#endif
             return true;
         }
 
@@ -38,12 +44,16 @@ namespace scene {
          */
         bool beginFrame() override {
             if (!initialized) {
+#if NULLBACKEND_ENABLE_LOGGING
                 std::cerr << "[NullBackend] Error: Not initialized!" << std::endl;
+#endif
                 return false;
             }
 
             frameCount++;
+#if NULLBACKEND_ENABLE_LOGGING
             std::cout << "[NullBackend] Begin frame #" << frameCount << std::endl;
+#endif
             return true;
         }
 
@@ -52,10 +62,13 @@ namespace scene {
          */
         bool submit(const CommandBuffer& commandBuffer) override {
             if (!initialized) {
+#if NULLBACKEND_ENABLE_LOGGING
                 std::cerr << "[NullBackend] Error: Not initialized!" << std::endl;
+#endif
                 return false;
             }
 
+#if NULLBACKEND_ENABLE_LOGGING
             std::cout << "[NullBackend] Submitting command buffer:" << std::endl;
 
             // Log draw items
@@ -97,7 +110,7 @@ namespace scene {
             const auto& target = commandBuffer.getRenderTarget();
             std::cout << "  - Target: " << target.targetId
                 << " (" << target.width << "x" << target.height << ")" << std::endl;
-
+#endif
             return true;
         }
 
@@ -106,11 +119,15 @@ namespace scene {
          */
         bool present() override {
             if (!initialized) {
+#if NULLBACKEND_ENABLE_LOGGING
                 std::cerr << "[NullBackend] Error: Not initialized!" << std::endl;
+#endif
                 return false;
             }
 
+#if NULLBACKEND_ENABLE_LOGGING
             std::cout << "[NullBackend] Present frame #" << frameCount << std::endl;
+#endif
             return true;
         }
 
@@ -119,8 +136,10 @@ namespace scene {
          */
         void shutdown() override {
             if (initialized) {
+#if NULLBACKEND_ENABLE_LOGGING
                 std::cout << "[NullBackend] Shutdown after " << frameCount
                     << " frames" << std::endl;
+#endif
                 initialized = false;
                 frameCount = 0;
             }
@@ -131,12 +150,16 @@ namespace scene {
          */
         bool resize(uint32_t newWidth, uint32_t newHeight) override {
             if (!initialized) {
+#if NULLBACKEND_ENABLE_LOGGING
                 std::cerr << "[NullBackend] Error: Not initialized!" << std::endl;
+#endif
                 return false;
             }
 
+#if NULLBACKEND_ENABLE_LOGGING
             std::cout << "[NullBackend] Resize from " << width << "x" << height
                 << " to " << newWidth << "x" << newHeight << std::endl;
+#endif
 
             this->width = newWidth;
             this->height = newHeight;
