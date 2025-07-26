@@ -64,6 +64,35 @@ namespace math {
          */
         constexpr const T& operator[](std::size_t i) const noexcept { assert(i < N); return data[i]; }
 
+        /*---------------- component accessors ----------------*/
+        /**
+         * @brief Accesso alla componente x (solo per vettori 2D, 3D, 4D).
+         * @return Riferimento alla prima componente.
+         */
+        constexpr       T& x()       noexcept requires (N >= 1) { return data[0]; }
+        constexpr const T& x() const noexcept requires (N >= 1) { return data[0]; }
+        
+        /**
+         * @brief Accesso alla componente y (solo per vettori 2D, 3D, 4D).
+         * @return Riferimento alla seconda componente.
+         */
+        constexpr       T& y()       noexcept requires (N >= 2) { return data[1]; }
+        constexpr const T& y() const noexcept requires (N >= 2) { return data[1]; }
+        
+        /**
+         * @brief Accesso alla componente z (solo per vettori 3D, 4D).
+         * @return Riferimento alla terza componente.
+         */
+        constexpr       T& z()       noexcept requires (N >= 3) { return data[2]; }
+        constexpr const T& z() const noexcept requires (N >= 3) { return data[2]; }
+        
+        /**
+         * @brief Accesso alla componente w (solo per vettori 4D).
+         * @return Riferimento alla quarta componente.
+         */
+        constexpr       T& w()       noexcept requires (N >= 4) { return data[3]; }
+        constexpr const T& w() const noexcept requires (N >= 4) { return data[3]; }
+
         /*---------------- arithmetic ----------------*/
         /**
          * @brief Somma un altro vettore a questo (component-wise).
