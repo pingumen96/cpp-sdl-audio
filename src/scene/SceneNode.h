@@ -2,7 +2,7 @@
 
 #include "SceneTypes.h"
 #include "../ecs/ECS.h"
-#include <glm/glm.hpp>
+#include "../math/math.h"
 #include <vector>
 #include <memory>
 #include <functional>
@@ -25,8 +25,8 @@ namespace scene {
         std::vector<std::unique_ptr<SceneNode>> children;
 
         // Transform matrices (synchronized from ECS Transform component)
-        glm::mat4 localMatrix{ 1.0f };
-        glm::mat4 worldMatrix{ 1.0f };
+        math::Matrix4f localMatrix{ 1.0f };
+        math::Matrix4f worldMatrix{ 1.0f };
 
         // Optional ECS entity link
         std::optional<ecs::Entity> entity;
@@ -225,18 +225,18 @@ namespace scene {
         /**
          * @brief Get local transformation matrix
          */
-        const glm::mat4& getLocalMatrix() const { return localMatrix; }
+        const math::Matrix4f& getLocalMatrix() const { return localMatrix; }
 
         /**
          * @brief Get world transformation matrix
          */
-        const glm::mat4& getWorldMatrix() const { return worldMatrix; }
+        const math::Matrix4f& getWorldMatrix() const { return worldMatrix; }
 
         /**
          * @brief Update local matrix (called by TransformSyncSystem)
          * @param matrix New local transformation matrix
          */
-        void updateLocalMatrix(const glm::mat4& matrix) {
+        void updateLocalMatrix(const math::Matrix4f& matrix) {
             localMatrix = matrix;
             markTransformDirty();
         }
@@ -245,7 +245,7 @@ namespace scene {
          * @brief Update world matrix (called by TransformSyncSystem)
          * @param matrix New world transformation matrix
          */
-        void updateWorldMatrix(const glm::mat4& matrix) {
+        void updateWorldMatrix(const math::Matrix4f& matrix) {
             worldMatrix = matrix;
             transformDirty = false;
         }

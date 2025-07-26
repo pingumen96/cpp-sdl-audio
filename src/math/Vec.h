@@ -37,7 +37,18 @@ namespace math {
         template <class... U>
             requires (sizeof...(U) == N) &&
         (std::is_convertible_v<U, T> && ...)
-            explicit constexpr Vec(U... xs) noexcept : data{ static_cast<T>(xs)... } {}
+            constexpr Vec(U... xs) noexcept : data{ static_cast<T>(xs)... } {}
+
+        /**
+         * @brief Costruttore che accetta un singolo valore e lo replica su tutte le componenti.
+         * @tparam U Tipo del valore da convertire.
+         * @param value Valore da assegnare a tutti gli elementi del vettore.
+         */
+        template <Arithmetic U>
+            requires (std::is_convertible_v<U, T>)
+        constexpr Vec(U value) noexcept {
+            data.fill(static_cast<T>(value));
+        }
 
         /**
          * @brief Costruttore di conversione da altro tipo aritmetico.
@@ -99,7 +110,7 @@ namespace math {
          * @param o Vettore da sommare.
          * @return Riferimento a *this.
          */
-        [[nodiscard]] constexpr Vec& operator+=(const Vec& o) noexcept {
+        constexpr Vec& operator+=(const Vec& o) noexcept {
             for (std::size_t i = 0; i < N; ++i) data[i] += o[i];
             return *this;
         }
@@ -108,7 +119,7 @@ namespace math {
          * @param o Vettore da sottrarre.
          * @return Riferimento a *this.
          */
-        [[nodiscard]] constexpr Vec& operator-=(const Vec& o) noexcept {
+        constexpr Vec& operator-=(const Vec& o) noexcept {
             for (std::size_t i = 0; i < N; ++i) data[i] -= o[i];
             return *this;
         }
@@ -117,7 +128,7 @@ namespace math {
          * @param s Scalare.
          * @return Riferimento a *this.
          */
-        [[nodiscard]] constexpr Vec& operator*=(T s) noexcept {
+        constexpr Vec& operator*=(T s) noexcept {
             for (auto& v : data) v *= s;
             return *this;
         }
@@ -127,7 +138,7 @@ namespace math {
          * @return Riferimento a *this.
          * @throws std::domain_error se s == 0.
          */
-        [[nodiscard]] constexpr Vec& operator/=(T s) {
+        constexpr Vec& operator/=(T s) {
             if (s == T{}) throw std::domain_error("Division by zero");
             for (auto& v : data) v /= s;
             return *this;
@@ -372,6 +383,24 @@ namespace math {
     using Vec2i = Vec2<int>;
     using Vec3i = Vec3<int>;
     using Vec4i = Vec4<int>;
+
+    /*================ math utility functions =================*/
+
+    /**
+     * @brief Convert degrees to radians
+     */
+    template <Arithmetic T>
+    constexpr T radians(T degrees) noexcept {
+        return degrees * T(3.14159265358979323846) / T(180);
+    }
+
+    /**
+     * @brief Convert radians to degrees
+     */
+    template <Arithmetic T>
+    constexpr T degrees(T radians) noexcept {
+        return radians * T(180) / T(3.14159265358979323846);
+    }
 
 } // namespace math
 

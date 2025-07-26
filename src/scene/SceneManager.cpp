@@ -1,7 +1,7 @@
 #include "SceneManager.h"
 #include "SceneTransitions.h"
 #include "rendering/NullBackend.h"
-#include <glm/gtc/matrix_transform.hpp>
+#include "../math/math.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -344,17 +344,17 @@ namespace scene {
         // For now, return a default camera
         // In a real implementation, you'd get this from the current scene
         CameraParams camera;
-        camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
-        camera.forward = glm::vec3(0.0f, 0.0f, -1.0f);
-        camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
+        camera.position = math::Vec3f(0.0f, 0.0f, 5.0f);
+        camera.forward = math::Vec3f(0.0f, 0.0f, -1.0f);
+        camera.up = math::Vec3f(0.0f, 1.0f, 0.0f);
 
         // Calculate view matrix
-        glm::vec3 target = camera.position + camera.forward;
-        camera.viewMatrix = glm::lookAt(camera.position, target, camera.up);
+        math::Vec3f target = camera.position + camera.forward;
+        camera.viewMatrix = math::lookAt(camera.position, target, camera.up);
 
         // Calculate projection matrix
         float aspect = static_cast<float>(renderWidth) / static_cast<float>(renderHeight);
-        camera.projectionMatrix = glm::perspective(glm::radians(camera.fov), aspect, camera.nearPlane, camera.farPlane);
+        camera.projectionMatrix = math::perspective(math::radians(camera.fov), aspect, camera.nearPlane, camera.farPlane);
 
         return camera;
     }

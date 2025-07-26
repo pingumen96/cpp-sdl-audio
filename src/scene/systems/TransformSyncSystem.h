@@ -3,9 +3,8 @@
 #include "../../ecs/System.h"
 #include "../../ecs/components/CommonComponents.h"
 #include "../SceneNode.h"
+#include "../../math/math.h"
 #include <unordered_map>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace scene {
 
@@ -94,7 +93,7 @@ namespace scene {
         void update(float deltaTime) override {
             // Process all root nodes and their hierarchies
             for (SceneNode* rootNode : rootNodes) {
-                updateNodeHierarchy(rootNode, glm::mat4(1.0f));
+                updateNodeHierarchy(rootNode, math::Matrix4f::identity());
             }
         }
 
@@ -108,21 +107,21 @@ namespace scene {
 
     private:
         /**
-         * @brief Convert ecs::components::Transform to GLM matrix
+         * @brief Convert ecs::components::Transform to math::Matrix4f
          */
-        glm::mat4 getTransformMatrix(const ecs::components::Transform& transform) {
-            glm::mat4 result = glm::mat4(1.0f);
+        math::Matrix4f getTransformMatrix(const ecs::components::Transform& transform) {
+            math::Matrix4f result = math::Matrix4f::identity();
 
             // Apply translation
-            result = glm::translate(result, glm::vec3(transform.position[0], transform.position[1], transform.position[2]));
+            result = math::translate(result, transform.position);
 
             // Apply rotation (assuming XYZ order)
-            result = glm::rotate(result, transform.rotation[0], glm::vec3(1, 0, 0));
-            result = glm::rotate(result, transform.rotation[1], glm::vec3(0, 1, 0));
-            result = glm::rotate(result, transform.rotation[2], glm::vec3(0, 0, 1));
+            result = math::rotate(result, transform.rotation.x(), math::Vec3f(1.0f, 0.0f, 0.0f));
+            result = math::rotate(result, transform.rotation.y(), math::Vec3f(0.0f, 1.0f, 0.0f));
+            result = math::rotate(result, transform.rotation.z(), math::Vec3f(0.0f, 0.0f, 1.0f));
 
             // Apply scale
-            result = glm::scale(result, glm::vec3(transform.scale[0], transform.scale[1], transform.scale[2]));
+            result = math::scale(result, transform.scale);
 
             return result;
         }
@@ -166,7 +165,7 @@ namespace scene {
          * @param node Current node to update
          * @param parentWorldMatrix World matrix of parent node
          */
-        void updateNodeHierarchy(SceneNode* node, const glm::mat4& parentWorldMatrix) {
+        void updateNodeHierarchy(SceneNode* node, const math::Matrix4f& parentWorldMatrix) {
             if (!node) return;
 
             // Update local matrix from Transform component if entity is linked
@@ -181,7 +180,7 @@ namespace scene {
             }
 
             // Calculate world matrix
-            glm::mat4 worldMatrix = parentWorldMatrix * node->getLocalMatrix();
+            math::Matrix4f worldMatrix = parentWorldMatrix * node->getLocalMatrix();
             node->updateWorldMatrix(worldMatrix);
 
             // Recursively update children

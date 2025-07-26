@@ -1,5 +1,6 @@
 #include "../../scene/SceneSystem.h"
 #include "../../scene/examples/SimpleTestScene.h"
+#include "../../math/math.h"
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
@@ -293,19 +294,19 @@ TEST_CASE("Scene System - Transform and ECS Integration", "[scene][transform]") 
     SECTION("Transform component") {
         Transform transform;
 
-        REQUIRE(transform.position == glm::vec3(0.0f));
-        REQUIRE(transform.scale == glm::vec3(1.0f));
+        REQUIRE(transform.position == math::Vec3f(0.0f));
+        REQUIRE(transform.scale == math::Vec3f(1.0f));
 
         // Test matrix calculation
-        glm::mat4 matrix = transform.getMatrix();
-        REQUIRE(matrix == glm::mat4(1.0f)); // Identity matrix for default transform
+        math::Matrix4f matrix = transform.getMatrix();
+        REQUIRE(matrix == math::Matrix4f::identity()); // Identity matrix for default transform
 
         // Modify transform
-        transform.position = glm::vec3(1.0f, 2.0f, 3.0f);
+        transform.position = math::Vec3f(1.0f, 2.0f, 3.0f);
         transform.scaleUniform(2.0f);
 
         matrix = transform.getMatrix();
-        REQUIRE(matrix != glm::mat4(1.0f)); // Should be different now
+        REQUIRE(matrix != math::Matrix4f::identity()); // Should be different now
     }
 
     SECTION("Scene node hierarchy") {

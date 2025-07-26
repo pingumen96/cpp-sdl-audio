@@ -8,6 +8,12 @@
 
 namespace math {
 
+    // Forward declaration
+    template <Arithmetic T> struct Quaternion;
+
+    // Forward declaration
+    template <Arithmetic T> struct Quaternion;
+
     // --- Matrix4<T> --------------------------------------------------------------
     template <Arithmetic T>
     struct Matrix4 {
@@ -180,7 +186,7 @@ namespace math {
         }
 
         static constexpr Matrix4 translation(const Vec3<T>& v) noexcept {
-            return translation(v.x, v.y, v.z);
+            return translation(v.x(), v.y(), v.z());
         }
 
         static constexpr Matrix4 scale(T x, T y, T z) noexcept {
@@ -193,7 +199,7 @@ namespace math {
         }
 
         static constexpr Matrix4 scale(const Vec3<T>& v) noexcept {
-            return scale(v.x, v.y, v.z);
+            return scale(v.x(), v.y(), v.z());
         }
 
         static constexpr Matrix4 scale(T s) noexcept {
@@ -286,6 +292,63 @@ namespace math {
             return result;
         }
     };
+
+    /*---------------- helper functions for GLM-like API ----------------*/
+
+    /**
+     * @brief Create a translation matrix and apply it to the given matrix
+     */
+    template <Arithmetic T>
+    constexpr Matrix4<T> translate(const Matrix4<T>& m, const Vec3<T>& v) noexcept {
+        return m * Matrix4<T>::translation(v);
+    }
+
+    /**
+     * @brief Create a rotation matrix around an axis and apply it to the given matrix
+     */
+    template <Arithmetic T>
+    Matrix4<T> rotate(const Matrix4<T>& m, T angle, const Vec3<T>& axis) noexcept {
+        // Normalize the axis
+        Vec3<T> normalizedAxis = normalize(axis);
+
+        T c = std::cos(angle);
+        T s = std::sin(angle);
+        T x = normalizedAxis.x();
+        T y = normalizedAxis.y();
+        T z = normalizedAxis.z();
+        T t = T(1) - c;
+
+        Matrix4<T> rotation(T(0));
+        rotation.m[0][0] = c + x * x * t;
+        rotation.m[1][0] = x * y * t - z * s;
+        rotation.m[2][0] = x * z * t + y * s;
+        rotation.m[3][0] = T(0);
+
+        rotation.m[0][1] = y * x * t + z * s;
+        rotation.m[1][1] = c + y * y * t;
+        rotation.m[2][1] = y * z * t - x * s;
+        rotation.m[3][1] = T(0);
+
+        rotation.m[0][2] = z * x * t - y * s;
+        rotation.m[1][2] = z * y * t + x * s;
+        rotation.m[2][2] = c + z * z * t;
+        rotation.m[3][2] = T(0);
+
+        rotation.m[0][3] = T(0);
+        rotation.m[1][3] = T(0);
+        rotation.m[2][3] = T(0);
+        rotation.m[3][3] = T(1);
+
+        return m * rotation;
+    }
+
+    /**
+     * @brief Create a scale matrix and apply it to the given matrix
+     */
+    template <Arithmetic T>
+    constexpr Matrix4<T> scale(const Matrix4<T>& m, const Vec3<T>& v) noexcept {
+        return m * Matrix4<T>::scale(v);
+    }
 
     /*---------------- type aliases ----------------*/
     using Matrix4f = Matrix4<float>;

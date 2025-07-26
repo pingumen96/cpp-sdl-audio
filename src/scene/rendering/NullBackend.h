@@ -83,15 +83,15 @@ namespace scene {
             for (size_t i = 0; i < uiItems.size(); ++i) {
                 const auto& item = uiItems[i];
                 std::cout << "    [" << i << "] Texture: " << item.textureId
-                    << ", Pos: (" << item.position.x << ", " << item.position.y << ")"
+                    << ", Pos: (" << item.position.x() << ", " << item.position.y() << ")"
                     << ", Layer: " << item.layer << std::endl;
             }
 
             // Log camera info
             const auto& camera = commandBuffer.getCamera();
-            std::cout << "  - Camera pos: (" << camera.position.x
-                << ", " << camera.position.y
-                << ", " << camera.position.z << ")" << std::endl;
+            std::cout << "  - Camera pos: (" << camera.position.x()
+                << ", " << camera.position.y()
+                << ", " << camera.position.z() << ")" << std::endl;
 
             // Log render target
             const auto& target = commandBuffer.getRenderTarget();

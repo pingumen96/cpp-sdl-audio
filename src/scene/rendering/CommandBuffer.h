@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "../../math/math.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -11,14 +11,14 @@ namespace scene {
      * @brief Basic draw item for rendering
      */
     struct DrawItem {
-        glm::mat4 modelMatrix{ 1.0f };
+        math::Matrix4f modelMatrix{ 1.0f };
         std::string materialId;
         std::string meshId;
         uint32_t renderLayer = 0;
         float depth = 0.0f;
 
         DrawItem() = default;
-        DrawItem(const glm::mat4& matrix, const std::string& material,
+        DrawItem(const math::Matrix4f& matrix, const std::string& material,
             const std::string& mesh, uint32_t layer = 0)
             : modelMatrix(matrix), materialId(material), meshId(mesh), renderLayer(layer) {}
     };
@@ -40,14 +40,14 @@ namespace scene {
      * @brief UI rendering item
      */
     struct UIItem {
-        glm::vec2 position{ 0.0f };
-        glm::vec2 size{ 1.0f };
+        math::Vec2f position{ 0.0f };
+        math::Vec2f size{ 1.0f };
         std::string textureId;
-        glm::vec4 color{ 1.0f };
+        math::Vec4f color{ 1.0f };
         uint32_t layer = 0;
 
         UIItem() = default;
-        UIItem(const glm::vec2& pos, const glm::vec2& sz, const std::string& tex)
+        UIItem(const math::Vec2f& pos, const math::Vec2f& sz, const std::string& tex)
             : position(pos), size(sz), textureId(tex) {}
     };
 
@@ -55,11 +55,11 @@ namespace scene {
      * @brief Camera parameters for rendering
      */
     struct CameraParams {
-        glm::mat4 viewMatrix{ 1.0f };
-        glm::mat4 projectionMatrix{ 1.0f };
-        glm::vec3 position{ 0.0f };
-        glm::vec3 forward{ 0.0f, 0.0f, -1.0f };
-        glm::vec3 up{ 0.0f, 1.0f, 0.0f };
+        math::Matrix4f viewMatrix{ 1.0f };
+        math::Matrix4f projectionMatrix{ 1.0f };
+        math::Vec3f position{ 0.0f };
+        math::Vec3f forward{ 0.0f, 0.0f, -1.0f };
+        math::Vec3f up{ 0.0f, 1.0f, 0.0f };
         float nearPlane = 0.1f;
         float farPlane = 1000.0f;
         float fov = 45.0f;

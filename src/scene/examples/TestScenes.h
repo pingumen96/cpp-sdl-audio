@@ -4,6 +4,7 @@
 #include "../../ecs/components/CommonComponents.h"
 #include "../systems/TransformSyncSystem.h"
 #include "../rendering/RenderQueueBuilder.h"
+#include "../../math/math.h"
 
 namespace scene {
 
@@ -74,10 +75,10 @@ namespace scene {
 
             // Add a test UI element
             UIItem uiItem;
-            uiItem.position = glm::vec2(0.1f, 0.1f);
-            uiItem.size = glm::vec2(0.2f, 0.1f);
+            uiItem.position = math::Vec2f(0.1f, 0.1f);
+            uiItem.size = math::Vec2f(0.2f, 0.1f);
             uiItem.textureId = "ui_test";
-            uiItem.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            uiItem.color = math::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
             uiItem.layer = 0;
             builder.enqueue(uiItem);
         }
@@ -94,37 +95,10 @@ namespace scene {
 
     private:
         /**
-         * @brief Convert math::Vec3f to glm::vec3
-         */
-        glm::vec3 toGlm(const math::Vec3f& v) {
-            return glm::vec3(v[0], v[1], v[2]);
-        }
-
-        /**
-         * @brief Convert glm::vec3 to math::Vec3f
-         */
-        math::Vec3f toMath(const glm::vec3& v) {
-            return math::Vec3f(v.x, v.y, v.z);
-        }
-
-        /**
          * @brief Get transformation matrix from ecs::components::Transform
          */
-        glm::mat4 getTransformMatrix(const ecs::components::Transform& transform) {
-            glm::mat4 result = glm::mat4(1.0f);
-
-            // Apply translation
-            result = glm::translate(result, toGlm(transform.position));
-
-            // Apply rotation (assuming XYZ order)
-            result = glm::rotate(result, transform.rotation[0], glm::vec3(1, 0, 0));
-            result = glm::rotate(result, transform.rotation[1], glm::vec3(0, 1, 0));
-            result = glm::rotate(result, transform.rotation[2], glm::vec3(0, 0, 1));
-
-            // Apply scale
-            result = glm::scale(result, toGlm(transform.scale));
-
-            return result;
+        math::Matrix4f getTransformMatrix(const ecs::components::Transform& transform) {
+            return transform.getMatrix();
         }
 
         /**
@@ -207,19 +181,19 @@ namespace scene {
         void render(RenderQueueBuilder& builder) override {
             // Render menu UI
             UIItem background;
-            background.position = glm::vec2(0.0f, 0.0f);
-            background.size = glm::vec2(1.0f, 1.0f);
+            background.position = math::Vec2f(0.0f, 0.0f);
+            background.size = math::Vec2f(1.0f, 1.0f);
             background.textureId = "";
-            background.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.7f); // Semi-transparent black
+            background.color = math::Vec4f(0.0f, 0.0f, 0.0f, 0.7f); // Semi-transparent black
             background.layer = 100;
             builder.enqueue(background);
 
             // Menu button
             UIItem button;
-            button.position = glm::vec2(0.4f, 0.45f);
-            button.size = glm::vec2(0.2f, 0.1f);
+            button.position = math::Vec2f(0.4f, 0.45f);
+            button.size = math::Vec2f(0.2f, 0.1f);
             button.textureId = "menu_button";
-            button.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            button.color = math::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
             button.layer = 101;
             builder.enqueue(button);
         }
@@ -253,28 +227,28 @@ namespace scene {
         void render(RenderQueueBuilder& builder) override {
             // Background
             UIItem background;
-            background.position = glm::vec2(0.0f, 0.0f);
-            background.size = glm::vec2(1.0f, 1.0f);
+            background.position = math::Vec2f(0.0f, 0.0f);
+            background.size = math::Vec2f(1.0f, 1.0f);
             background.textureId = "";
-            background.color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+            background.color = math::Vec4f(0.1f, 0.1f, 0.1f, 1.0f);
             background.layer = 0;
             builder.enqueue(background);
 
             // Progress bar background
             UIItem progressBg;
-            progressBg.position = glm::vec2(0.25f, 0.45f);
-            progressBg.size = glm::vec2(0.5f, 0.05f);
+            progressBg.position = math::Vec2f(0.25f, 0.45f);
+            progressBg.size = math::Vec2f(0.5f, 0.05f);
             progressBg.textureId = "";
-            progressBg.color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+            progressBg.color = math::Vec4f(0.3f, 0.3f, 0.3f, 1.0f);
             progressBg.layer = 1;
             builder.enqueue(progressBg);
 
             // Progress bar fill
             UIItem progressFill;
-            progressFill.position = glm::vec2(0.25f, 0.45f);
-            progressFill.size = glm::vec2(0.5f * loadingProgress, 0.05f);
+            progressFill.position = math::Vec2f(0.25f, 0.45f);
+            progressFill.size = math::Vec2f(0.5f * loadingProgress, 0.05f);
             progressFill.textureId = "";
-            progressFill.color = glm::vec4(0.2f, 0.8f, 0.2f, 1.0f);
+            progressFill.color = math::Vec4f(0.2f, 0.8f, 0.2f, 1.0f);
             progressFill.layer = 2;
             builder.enqueue(progressFill);
         }

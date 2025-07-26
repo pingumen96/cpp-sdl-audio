@@ -1,8 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "../../math/math.h"
 
 namespace scene {
 
@@ -14,9 +12,9 @@ namespace scene {
      * from this component by the TransformSyncSystem.
      */
     struct Transform {
-        glm::vec3 position{ 0.0f, 0.0f, 0.0f };
-        glm::quat rotation{ 1.0f, 0.0f, 0.0f, 0.0f }; // w, x, y, z (identity)
-        glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
+        math::Vec3f position{ 0.0f, 0.0f, 0.0f };
+        math::Quatf rotation{ 1.0f, 0.0f, 0.0f, 0.0f }; // w, x, y, z (identity)
+        math::Vec3f scale{ 1.0f, 1.0f, 1.0f };
 
         /**
          * @brief Default constructor
@@ -26,28 +24,28 @@ namespace scene {
         /**
          * @brief Constructor with position
          */
-        Transform(const glm::vec3& pos) : position(pos) {}
+        Transform(const math::Vec3f& pos) : position(pos) {}
 
         /**
          * @brief Constructor with position and rotation
          */
-        Transform(const glm::vec3& pos, const glm::quat& rot)
+        Transform(const math::Vec3f& pos, const math::Quatf& rot)
             : position(pos), rotation(rot) {}
 
         /**
          * @brief Constructor with all parameters
          */
-        Transform(const glm::vec3& pos, const glm::quat& rot, const glm::vec3& sc)
+        Transform(const math::Vec3f& pos, const math::Quatf& rot, const math::Vec3f& sc)
             : position(pos), rotation(rot), scale(sc) {}
 
         /**
          * @brief Calculate the local transformation matrix
          * @return Local transformation matrix
          */
-        glm::mat4 getMatrix() const {
-            glm::mat4 t = glm::translate(glm::mat4(1.0f), position);
-            glm::mat4 r = glm::mat4_cast(rotation);
-            glm::mat4 s = glm::scale(glm::mat4(1.0f), scale);
+        math::Matrix4f getMatrix() const {
+            math::Matrix4f t = math::Matrix4f::translation(position);
+            math::Matrix4f r = rotation.toMatrix();
+            math::Matrix4f s = math::Matrix4f::scale(scale);
             return t * r * s;
         }
 
@@ -55,27 +53,27 @@ namespace scene {
          * @brief Set rotation from euler angles (in radians)
          */
         void setEulerAngles(float x, float y, float z) {
-            rotation = glm::quat(glm::vec3(x, y, z));
+            rotation = math::Quatf(math::Vec3f(x, y, z));
         }
 
         /**
          * @brief Get euler angles from rotation (in radians)
          */
-        glm::vec3 getEulerAngles() const {
-            return glm::eulerAngles(rotation);
+        math::Vec3f getEulerAngles() const {
+            return rotation.toEulerAngles();
         }
 
         /**
          * @brief Translate by offset
          */
-        void translate(const glm::vec3& offset) {
+        void translate(const math::Vec3f& offset) {
             position += offset;
         }
 
         /**
          * @brief Rotate by quaternion
          */
-        void rotate(const glm::quat& rot) {
+        void rotate(const math::Quatf& rot) {
             rotation = rot * rotation;
         }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../math/Vec.h"
+#include "../../math/math.h"
 
 namespace ecs::components {
 
@@ -22,6 +22,27 @@ namespace ecs::components {
 
         Transform(const math::Vec3f& pos, const math::Vec3f& rot, const math::Vec3f& scl)
             : position(pos), rotation(rot), scale(scl) {}
+
+        /**
+         * @brief Calculate the local transformation matrix
+         * @return Local transformation matrix
+         */
+        math::Matrix4f getMatrix() const {
+            math::Matrix4f result = math::Matrix4f::identity();
+
+            // Apply translation
+            result = math::translate(result, position);
+
+            // Apply rotation (XYZ order)
+            result = math::rotate(result, rotation.x(), math::Vec3f(1.0f, 0.0f, 0.0f));
+            result = math::rotate(result, rotation.y(), math::Vec3f(0.0f, 1.0f, 0.0f));
+            result = math::rotate(result, rotation.z(), math::Vec3f(0.0f, 0.0f, 1.0f));
+
+            // Apply scale
+            result = math::scale(result, scale);
+
+            return result;
+        }
     };
 
     /**
