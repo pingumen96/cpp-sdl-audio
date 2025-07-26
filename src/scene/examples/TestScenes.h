@@ -139,7 +139,7 @@ namespace scene {
 
             // Animate entity 1 - rotate around Y axis
             auto& transform1 = coordinator->getComponent<ecs::components::Transform>(testEntity1);
-            transform1.rotation = math::Vec3f(0.0f, time, 0.0f);
+            transform1.rotation = math::Quatf(math::Vec3f(0.0f, time, 0.0f)); // Convert Euler to Quaternion
 
             // Update scene node matrix
             if (auto* node = transformSystem->getNodeForEntity(testEntity1)) {

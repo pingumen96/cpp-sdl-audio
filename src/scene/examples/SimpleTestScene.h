@@ -8,7 +8,7 @@ namespace scene {
 
     /**
      * @brief Simple test scene that doesn't load any resources
-     * 
+     *
      * This scene is designed for testing the core scene/ECS functionality
      * without dealing with resource loading complications.
      */
@@ -59,14 +59,14 @@ namespace scene {
          */
         ecs::Entity createTestEntity() {
             ecs::Entity entity = coordinator->createEntity();
-            
+
             ecs::components::Transform transform;
             transform.position = math::Vec3f(1.0f, 2.0f, 3.0f);
-            transform.rotation = math::Vec3f(0.0f, 0.0f, 0.0f);
+            transform.rotation = math::Quatf(math::Vec3f(0.0f, 0.0f, 0.0f)); // Convert Euler to Quaternion
             transform.scale = math::Vec3f(1.0f, 1.0f, 1.0f);
-            
+
             coordinator->addComponent(entity, transform);
-            
+
             return entity;
         }
     };

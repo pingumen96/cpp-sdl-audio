@@ -14,9 +14,6 @@
 // Component type registry
 #include "ComponentTypeRegistry.h"
 
-// Components
-#include "components/Transform.h"
-
 // Scene hierarchy
 #include "SceneNode.h"
 

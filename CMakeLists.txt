@@ -84,6 +84,8 @@ src/resources/loaders/MeshLoaders.cpp
 # Scene Management System
 src/scene/Scene.cpp
 src/scene/SceneManager.cpp
+# Renderer2D System (needed for Color::White and other constants)
+src/scene/rendering/Renderer2D.cpp
 )
 
 target_include_directories(sdl_app

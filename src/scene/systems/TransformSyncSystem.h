@@ -115,10 +115,9 @@ namespace scene {
             // Apply translation
             result = math::translate(result, transform.position);
 
-            // Apply rotation (assuming XYZ order)
-            result = math::rotate(result, transform.rotation.x(), math::Vec3f(1.0f, 0.0f, 0.0f));
-            result = math::rotate(result, transform.rotation.y(), math::Vec3f(0.0f, 1.0f, 0.0f));
-            result = math::rotate(result, transform.rotation.z(), math::Vec3f(0.0f, 0.0f, 1.0f));
+            // Apply rotation from quaternion
+            math::Matrix4f rotationMatrix = transform.rotation.toMatrix();
+            result = result * rotationMatrix;
 
             // Apply scale
             result = math::scale(result, transform.scale);

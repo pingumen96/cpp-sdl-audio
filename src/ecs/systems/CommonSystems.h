@@ -34,8 +34,13 @@ namespace ecs::systems {
                 // Update position based on linear velocity
                 transform.position = transform.position + velocity.linear * deltaTime;
 
-                // Update rotation based on angular velocity
-                transform.rotation = transform.rotation + velocity.angular * deltaTime;
+                // Update rotation based on angular velocity (quaternion integration)
+                if (velocity.angular.length() > 0.0f) {
+                    float angle = velocity.angular.length() * deltaTime;
+                    math::Vec3f axis = velocity.angular.normalized();
+                    math::Quatf deltaRotation(angle, axis);
+                    transform.rotation = transform.rotation * deltaRotation;
+                }
             }
         }
     };
@@ -153,3 +158,6 @@ namespace ecs::systems {
     };
 
 } // namespace ecs::systems
+
+// Include additional system types
+#include "Renderer2DSystem.h"

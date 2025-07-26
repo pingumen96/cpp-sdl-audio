@@ -292,7 +292,7 @@ TEST_CASE("Scene System - Transform and ECS Integration", "[scene][transform]") 
     ensureComponentRegistryInitialized();
 
     SECTION("Transform component") {
-        Transform transform;
+        ecs::components::Transform transform;
 
         REQUIRE(transform.position == math::Vec3f(0.0f));
         REQUIRE(transform.scale == math::Vec3f(1.0f));

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <iostream>
+#include <SDL2/SDL.h>
 #include "input/InputHandler.h"
 #include "Avatar.h"
 #include "../core/Renderer.h"
@@ -18,6 +19,9 @@ namespace core {
 }
 
 namespace game {
+    // Forward declarations for new scene system
+    class MenuScene;
+    class GameScene;
 
     class Game {
     public:
@@ -47,15 +51,16 @@ namespace game {
         scene::SceneManager* getSceneManager() const { return sceneManager.get(); }
 
     private:
-        std::unique_ptr<GameState> state; // Stato di gioco attivo
+        std::unique_ptr<GameState> state; // Stato di gioco attivo (DEPRECATED - use scenes)
         std::unique_ptr<input::InputHandler> inputHandler;
         Avatar avatar; // Il tuo avatar di gioco
         core::Renderer renderer; // Renderer SDL2
 
-        // Scene system
+        // Scene system (PRIMARY)
         std::unique_ptr<scene::SceneManager> sceneManager;
 
         void initializeSceneSystem();
+        void handleSceneInput(const SDL_Event& event);
     };
 
 } // namespace game

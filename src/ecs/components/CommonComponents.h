@@ -9,39 +9,75 @@ namespace ecs::components {
      */
     struct Transform {
         math::Vec3f position{ 0.0f, 0.0f, 0.0f };
-        math::Vec3f rotation{ 0.0f, 0.0f, 0.0f }; // Euler angles in radians
+        math::Quatf rotation{ 1.0f, 0.0f, 0.0f, 0.0f }; // w, x, y, z (identity)
         math::Vec3f scale{ 1.0f, 1.0f, 1.0f };
 
+        /**
+         * @brief Default constructor
+         */
         Transform() = default;
 
-        Transform(const math::Vec3f& pos)
-            : position(pos) {}
+        /**
+         * @brief Constructor with position
+         */
+        Transform(const math::Vec3f& pos) : position(pos) {}
 
-        Transform(const math::Vec3f& pos, const math::Vec3f& rot)
+        /**
+         * @brief Constructor with position and rotation
+         */
+        Transform(const math::Vec3f& pos, const math::Quatf& rot)
             : position(pos), rotation(rot) {}
 
-        Transform(const math::Vec3f& pos, const math::Vec3f& rot, const math::Vec3f& scl)
-            : position(pos), rotation(rot), scale(scl) {}
+        /**
+         * @brief Constructor with all parameters
+         */
+        Transform(const math::Vec3f& pos, const math::Quatf& rot, const math::Vec3f& sc)
+            : position(pos), rotation(rot), scale(sc) {}
 
         /**
          * @brief Calculate the local transformation matrix
          * @return Local transformation matrix
          */
         math::Matrix4f getMatrix() const {
-            math::Matrix4f result = math::Matrix4f::identity();
+            math::Matrix4f t = math::Matrix4f::translation(position);
+            math::Matrix4f r = rotation.toMatrix();
+            math::Matrix4f s = math::Matrix4f::scale(scale);
+            return t * r * s;
+        }
 
-            // Apply translation
-            result = math::translate(result, position);
+        /**
+         * @brief Set rotation from euler angles (in radians)
+         */
+        void setEulerAngles(float x, float y, float z) {
+            rotation = math::Quatf(math::Vec3f(x, y, z));
+        }
 
-            // Apply rotation (XYZ order)
-            result = math::rotate(result, rotation.x(), math::Vec3f(1.0f, 0.0f, 0.0f));
-            result = math::rotate(result, rotation.y(), math::Vec3f(0.0f, 1.0f, 0.0f));
-            result = math::rotate(result, rotation.z(), math::Vec3f(0.0f, 0.0f, 1.0f));
+        /**
+         * @brief Get euler angles from rotation (in radians)
+         */
+        math::Vec3f getEulerAngles() const {
+            return rotation.toEulerAngles();
+        }
 
-            // Apply scale
-            result = math::scale(result, scale);
+        /**
+         * @brief Translate by offset
+         */
+        void translate(const math::Vec3f& offset) {
+            position += offset;
+        }
 
-            return result;
+        /**
+         * @brief Rotate by quaternion
+         */
+        void rotate(const math::Quatf& rot) {
+            rotation = rot * rotation;
+        }
+
+        /**
+         * @brief Scale uniformly
+         */
+        void scaleUniform(float factor) {
+            scale *= factor;
         }
     };
 
@@ -148,3 +184,6 @@ namespace ecs::components {
     };
 
 } // namespace ecs::components
+
+// Include additional component types
+#include "Renderable2D.h"
