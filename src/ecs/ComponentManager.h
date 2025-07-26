@@ -59,7 +59,10 @@ namespace ecs {
         void registerComponent() {
             std::type_index typeIndex = std::type_index(typeid(T));
 
-            assert(mComponentTypes.find(typeIndex) == mComponentTypes.end() && "Registering component type more than once.");
+            // If component is already registered, return early (no error)
+            if (mComponentTypes.find(typeIndex) != mComponentTypes.end()) {
+                return;
+            }
 
             // Add this component type to the component type map
             mComponentTypes[typeIndex] = mNextComponentType;

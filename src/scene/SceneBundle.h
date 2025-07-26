@@ -9,7 +9,7 @@ namespace scene {
 
     /**
      * @brief Bundle containing resource metadata for a scene
-     * 
+     *
      * SceneBundle describes the resources needed by a scene but doesn't
      * implement loading itself. It uses the ResourceManager API for
      * acquiring and releasing resources.
@@ -18,11 +18,11 @@ namespace scene {
     private:
         std::vector<std::string> resourcePaths;
         std::unordered_set<resources::ResourceGUID> resourceGuids;
-        
+
         // Progress tracking
         mutable size_t loadedCount = 0;
         mutable bool progressDirty = true;
-        
+
     public:
         /**
          * @brief Default constructor
@@ -94,11 +94,11 @@ namespace scene {
             for (const auto& path : resourcePaths) {
                 resources::LoadOptions options;
                 options.async = async;
-                
+
                 auto result = resourceManager.load(path, options);
-                if (result == resources::LoadResult::Success || 
+                if (result == resources::LoadResult::Success ||
                     result == resources::LoadResult::AlreadyLoaded) {
-                    
+
                     resources::ResourceGUID guid = resourceManager.generateGUID(path);
                     resourceGuids.insert(guid);
                 } else {
@@ -127,7 +127,7 @@ namespace scene {
             resourceGuids.clear();
             loadedCount = 0;
             progressDirty = true;
-            
+
             return releasedCount;
         }
 
@@ -176,8 +176,8 @@ namespace scene {
          * @return Shared pointer to resource or nullptr if not found/loaded
          */
         template<typename T>
-        std::shared_ptr<T> getResource(resources::ResourceManager& resourceManager, 
-                                      const std::string& path) const {
+        std::shared_ptr<T> getResource(resources::ResourceManager& resourceManager,
+            const std::string& path) const {
             return resourceManager.get<T>(path);
         }
     };

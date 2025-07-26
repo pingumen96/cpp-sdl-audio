@@ -3,6 +3,7 @@
 #include "SceneTypes.h"
 #include "SceneBundle.h"
 #include "SceneNode.h"
+#include "ComponentTypeRegistry.h"
 #include "rendering/RenderQueueBuilder.h"
 #include "../ecs/ECS.h"
 #include "../ecs/components/CommonComponents.h"
@@ -17,12 +18,12 @@ namespace scene {
 
     /**
      * @brief Abstract base class for all scenes
-     * 
+     *
      * A Scene encapsulates:
      * - An ECS world (identified by WorldID)
      * - A scene graph hierarchy (SceneNode)
      * - A resource bundle describing needed assets
-     * 
+     *
      * The scene has a well-defined lifecycle:
      * onAttach → onActivate → update/render → onDeactivate → onDetach
      */
@@ -41,20 +42,19 @@ namespace scene {
          * @brief Constructor
          * @param name Scene name for debugging
          */
-        explicit Scene(const std::string& name = "Scene") 
+        explicit Scene(const std::string& name = "Scene")
             : sceneName(name), rootNode(std::make_unique<SceneNode>("Root")) {
-            coordinator = ecs::createCoordinator();
-            
-            // Register common components used by scenes
-            coordinator->registerComponent<ecs::components::Transform>();
-            coordinator->registerComponent<ecs::components::Velocity>();
-            coordinator->registerComponent<ecs::components::Renderable>();
-            coordinator->registerComponent<ecs::components::Health>();
-            coordinator->registerComponent<ecs::components::PlayerTag>();
-            coordinator->registerComponent<ecs::components::EnemyTag>();
-        }
 
-        /**
+            // Ensure common component types are registered globally
+            ComponentTypeRegistry::initializeCommonTypes();
+
+            // Create isolated coordinator for this scene
+            coordinator = ecs::createCoordinator();
+
+            // Register components in this coordinator's isolated world
+            // (This is now safe because ComponentManager handles multiple registrations)
+            setupSceneComponents();
+        }        /**
          * @brief Virtual destructor
          */
         virtual ~Scene() = default;
@@ -73,7 +73,7 @@ namespace scene {
          * - Register ECS systems
          * - Build the scene hierarchy
          * - Set up the resource bundle
-         * 
+         *
          * @param manager Reference to the scene manager
          */
         virtual void onAttach(SceneManager& manager) = 0;
@@ -99,7 +99,7 @@ namespace scene {
          * This is where you should:
          * - Clean up resources (handled automatically by bundle)
          * - Perform final cleanup
-         * 
+         *
          * @param manager Reference to the scene manager
          */
         virtual void onDetach(SceneManager& manager) {
@@ -201,6 +201,19 @@ namespace scene {
          * @return Pointer to resource manager or nullptr
          */
         resources::ResourceManager* getResourceManager(SceneManager& manager) const;
+
+        /**
+         * @brief Setup common components for this scene's ECS world
+         */
+        void setupSceneComponents() {
+            // Register common components in this coordinator's isolated world
+            coordinator->registerComponent<ecs::components::Transform>();
+            coordinator->registerComponent<ecs::components::Velocity>();
+            coordinator->registerComponent<ecs::components::Renderable>();
+            coordinator->registerComponent<ecs::components::Health>();
+            coordinator->registerComponent<ecs::components::PlayerTag>();
+            coordinator->registerComponent<ecs::components::EnemyTag>();
+        }
 
         /**
          * @brief Set world ID (called by scene manager)

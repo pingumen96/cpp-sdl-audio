@@ -9,6 +9,7 @@
     "nlohmann-json",
     "libjpeg-turbo",
     "opengl",
-    "glew"
+    "glew",
+    "glm"
   ]
 }
