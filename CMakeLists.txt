@@ -128,11 +128,24 @@ if(TARGET nlohmann_json::nlohmann_json)
     target_link_libraries(sdl_app PRIVATE nlohmann_json::nlohmann_json)
 endif()
 
+# ECS Demo executable
+add_executable(ecs_demo
+    src/ecs_demo.cpp
+)
+
+target_include_directories(ecs_demo
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# ECS is header-only, so no additional libraries needed for basic demo
+
 
 add_executable(sdl_appTests
 src/tests/main_test.cpp
 src/tests/resource_system_test.cpp
 src/tests/filesystem_normalize_test.cpp
+src/tests/ecs_test.cpp
 # Resource Management System (for tests)
 src/resources/IFileSystem.cpp
 src/resources/LoaderFactory.cpp
