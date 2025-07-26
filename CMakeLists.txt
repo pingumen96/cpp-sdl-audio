@@ -207,6 +207,13 @@ src/tests/scene/simple_test.cpp
 src/tests/scene/minimal_test.cpp
 src/tests/scene/debug_components.cpp
 src/tests/scene/registry_debug.cpp
+src/tests/scene/scene_debug.cpp
+src/tests/scene/onattach_debug.cpp
+src/tests/scene/simple_scene_test.cpp
+# src/tests/scene/onattach_detail_debug.cpp  # Temporarily disabled due to resource loading
+src/tests/scene/scene_integration_test.cpp
+src/tests/resources/mock_resource_test.cpp
+# src/tests/scene/resource_debug.cpp  # Temporarily disabled due to OpenGL dependency
 # Resource Management System (for tests)
 src/resources/IFileSystem.cpp
 src/resources/LoaderFactory.cpp
