@@ -3,6 +3,7 @@
 #include "../../resources/IResource.h"
 #include "../../resources/ResourceManager.h"
 #include "../../resources/IResourceLoader.h"
+#include "../../resources/IFileSystem.h"
 #include <memory>
 #include <unordered_map>
 #include <string>
@@ -90,10 +91,38 @@ namespace test {
     };
 
     /**
+     * @brief Mock file system that simulates file existence for testing
+     */
+    class MockFileSystem : public IFileSystem {
+    public:
+        bool exists(const std::string& path) const override {
+            // Always return true for mock testing
+            return true;
+        }
+
+        size_t size(const std::string& path) const override {
+            // Return a mock size
+            return 1024;
+        }
+
+        FileData readAll(const std::string& path) const override {
+            // Return mock data
+            std::vector<uint8_t> mockData = {'M', 'O', 'C', 'K', '_', 'D', 'A', 'T', 'A'};
+            return FileData{std::move(mockData)};
+        }
+
+        std::string normalize(const std::string& path) const override {
+            // Simple normalization for testing
+            return path;
+        }
+    };
+
+    /**
      * @brief Create a ResourceManager configured for testing
      */
     inline std::unique_ptr<ResourceManager> createTestResourceManager() {
-        auto resourceManager = std::make_unique<ResourceManager>();
+        // Create ResourceManager with mock file system
+        auto resourceManager = std::make_unique<ResourceManager>(std::make_unique<MockFileSystem>());
 
         // Register mock loaders for common file types
         resourceManager->registerLoader(std::make_unique<MockResourceLoader>(
