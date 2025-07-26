@@ -50,7 +50,6 @@ endif()
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(glm REQUIRED)
 
 
 add_executable(sdl_app
@@ -114,7 +113,6 @@ if(WIN32)
         SDL2_ttf::SDL2_ttf-static
         OpenGL::GL
         GLEW::GLEW
-        glm::glm
     )
 else()
     # Linux-specific SDL2 linking (shared libraries)
@@ -125,7 +123,6 @@ else()
         SDL2_ttf::SDL2_ttf
         OpenGL::GL
         GLEW::GLEW
-        glm::glm
     )
 endif()
 
@@ -177,7 +174,6 @@ if(WIN32)
         SDL2_ttf::SDL2_ttf-static
         OpenGL::GL
         GLEW::GLEW
-        glm::glm
     )
 else()
     target_link_libraries(scene_demo PRIVATE
@@ -187,7 +183,6 @@ else()
         SDL2_ttf::SDL2_ttf
         OpenGL::GL
         GLEW::GLEW
-        glm::glm
     )
 endif()
 
@@ -202,6 +197,7 @@ src/tests/main_test.cpp
 src/tests/resource_system_test.cpp
 src/tests/filesystem_normalize_test.cpp
 src/tests/ecs_test.cpp
+src/tests/math_library_test.cpp
 src/tests/scene/scene_system_test.cpp
 src/tests/scene/simple_test.cpp
 src/tests/scene/minimal_test.cpp
@@ -239,7 +235,6 @@ if(WIN32)
         SDL2_ttf::SDL2_ttf-static
         OpenGL::GL
         GLEW::GLEW
-        glm::glm
     )
 else()
     target_link_libraries(sdl_appTests PRIVATE
@@ -249,7 +244,6 @@ else()
         SDL2_ttf::SDL2_ttf
         OpenGL::GL
         GLEW::GLEW
-        glm::glm
     )
 endif()
 
