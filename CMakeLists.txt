@@ -208,6 +208,8 @@ add_executable(scene_demo
     src/resources/types/MeshResource.cpp
     src/resources/loaders/TextureLoaders.cpp
     src/resources/loaders/MeshLoaders.cpp
+    # Renderer2D System (Color::White, ecc)
+    src/scene/rendering/Renderer2D.cpp
 )
 
 target_include_directories(scene_demo

@@ -209,7 +209,7 @@ namespace scene {
             // Register common components in this coordinator's isolated world
             coordinator->registerComponent<ecs::components::Transform>();
             coordinator->registerComponent<ecs::components::Velocity>();
-            coordinator->registerComponent<ecs::components::Renderable>();
+            coordinator->registerComponent<ecs::components::Renderable2D>();
             coordinator->registerComponent<ecs::components::Health>();
             coordinator->registerComponent<ecs::components::PlayerTag>();
             coordinator->registerComponent<ecs::components::EnemyTag>();

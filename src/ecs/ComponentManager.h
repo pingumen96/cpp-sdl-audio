@@ -4,6 +4,7 @@
 #include "ComponentArray.h"
 #include "ECSTypes.h"
 #include <array>
+#include <iostream>
 #include <memory>
 #include <unordered_map>
 #include <typeindex>
@@ -39,6 +40,8 @@ namespace ecs {
         template<typename T>
         std::shared_ptr<ComponentArray<T>> getComponentArray() {
             std::type_index typeIndex = std::type_index(typeid(T));
+
+            std::cout << "[ComponentManager] Accessing component array for type: " << typeIndex.name() << std::endl;
 
             assert(mComponentTypes.find(typeIndex) != mComponentTypes.end() && "Component not registered before use.");
 
@@ -82,6 +85,8 @@ namespace ecs {
         template<typename T>
         ComponentType getComponentType() {
             std::type_index typeIndex = std::type_index(typeid(T));
+
+            std::cout << "[ComponentManager] Getting component type ID for: " << typeIndex.name() << std::endl;
 
             assert(mComponentTypes.find(typeIndex) != mComponentTypes.end() && "Component not registered before use.");
 
