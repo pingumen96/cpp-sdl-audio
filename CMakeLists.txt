@@ -58,6 +58,7 @@ src/AudioSample.cpp
 src/game/Game.h
 src/game/input/SceneInputSystem.cpp
 src/game/Game.cpp
+src/game/PongScene.cpp
 src/ecs/ComponentManager.cpp
 src/core/GLContext.cpp
 src/core/Renderer.cpp
@@ -74,6 +75,7 @@ src/resources/loaders/TextureLoaders.cpp
 src/resources/loaders/MeshLoaders.cpp
 # Scene Management System
 src/scene/Scene.cpp
+src/scene/Scene2D.cpp
 src/scene/SceneManager.cpp
 # Renderer2D System (needed for Color::White and other constants)
 src/scene/rendering/Renderer2D.cpp

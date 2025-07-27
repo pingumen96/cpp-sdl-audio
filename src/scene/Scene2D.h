@@ -33,33 +33,7 @@ namespace scene {
          * @brief Initialize 2D scene with Renderer2D integration
          * Called automatically during scene attachment
          */
-        void initialize2D(SceneManager& manager) {
-            // Create Renderer2D instance for this scene
-            auto* resourceManager = getResourceManager(manager);
-            if (!resourceManager) {
-                std::cerr << "[Scene2D] Warning: No resource manager available" << std::endl;
-                return;
-            }
-
-            // Get render queue builder from scene manager
-            RenderQueueBuilder& renderBuilder = manager.getRenderQueueBuilder();
-
-            renderer2D = createRenderer2D(*resourceManager, renderBuilder);
-
-            // Configure Renderer2D
-            RendererConfig2D config;
-            config.maxQuadsPerBatch = 10000;
-            config.enableSorting = true;
-            config.enableBatching = true;
-
-            if (!renderer2D->init(config)) {
-                std::cerr << "[Scene2D] Failed to initialize Renderer2D!" << std::endl;
-                return;
-            }
-
-            // Create and register ECS systems
-            setupECSSystems();
-        }
+        void initialize2D(SceneManager& manager);
 
         /**
          * @brief Setup common ECS systems for 2D scenes
