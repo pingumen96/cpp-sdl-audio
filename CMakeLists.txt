@@ -195,6 +195,9 @@ endif()
 # Scene System Demo executable
 add_executable(scene_demo
     src/scene_demo.cpp
+    # ECS System
+    src/ecs/ComponentManager.cpp
+    src/scene/ComponentTypeRegistry.cpp
     # Scene Management System
     src/scene/Scene.cpp
     src/scene/SceneManager.cpp
@@ -262,6 +265,9 @@ src/tests/scene/simple_scene_test.cpp
 src/tests/scene/scene_integration_test.cpp
 src/tests/resources/mock_resource_test.cpp
 # src/tests/scene/resource_debug.cpp  # Temporarily disabled due to OpenGL dependency
+# ECS System (for tests)
+src/ecs/ComponentManager.cpp
+src/scene/ComponentTypeRegistry.cpp
 # Renderer2D System (for tests)
 src/scene/rendering/Renderer2D.cpp
 # Resource Management System (for tests)

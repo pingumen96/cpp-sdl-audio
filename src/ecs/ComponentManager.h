@@ -182,7 +182,7 @@ namespace ecs {
          * @return Number of component types
          */
         size_t getRegisteredComponentCount() const {
-            return mNextComponentType;
+            return mComponentTypes.size();
         }
 
         /**
