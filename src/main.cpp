@@ -23,36 +23,8 @@ int main() {
 
         game.init();
 
-        // Initialize and demonstrate scene system integration
-        if (game.getSceneManager()) {
-            std::cout << "\n=== Scene System Integration Demo ===" << std::endl;
-
-            // Create and push a game scene
-            auto gameScene = std::make_unique<game::GameScene>();
-            game.getSceneManager()->pushScene(std::move(gameScene));
-
-            std::cout << "Game scene pushed to scene manager" << std::endl;
-
-            // Run a few scene system update/render cycles
-            std::cout << "\nRunning scene system cycles..." << std::endl;
-            const float deltaTime = 1.0f / 60.0f;
-
-            for (int i = 0; i < 5; ++i) {
-                std::cout << "\n--- Scene Cycle " << (i + 1) << " ---" << std::endl;
-                game.getSceneManager()->update(deltaTime);
-                bool renderSuccess = game.getSceneManager()->render();
-
-                if (!renderSuccess) {
-                    std::cerr << "Scene render failed!" << std::endl;
-                }
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-
-            std::cout << "\nScene system demo completed!" << std::endl;
-        } else {
-            std::cerr << "Scene manager not available, falling back to regular game loop" << std::endl;
-        }
+        // Skip the demo and go directly to main game loop
+        std::cout << "\n=== Starting Pong Game ===" << std::endl;
 
         // Run the normal game loop
         game.mainLoop();

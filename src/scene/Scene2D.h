@@ -82,6 +82,9 @@ namespace scene {
             Camera2D camera;
             camera.setViewportSize(math::Vec2f(800.0f, 600.0f)); // TODO: Get actual viewport size
 
+            // Position camera to match game coordinate system (center at screen center)
+            camera.setPosition(math::Vec2f(400.0f, 300.0f)); // Center camera at screen center for Pong
+
             // Begin 2D scene
             renderer2D->beginScene(camera);
 

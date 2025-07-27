@@ -2,15 +2,9 @@
 
 #include "../scene/rendering/IRenderBackend.h"
 #include "../math/Matrix.h"
+#include <GL/glew.h>
 #include <memory>
 #include <string>
-
-// Forward declaration to avoid including OpenGL headers in header
-extern "C" {
-    void glClear(unsigned int mask);
-    void glClearColor(float red, float green, float blue, float alpha);
-    void glViewport(int x, int y, int width, int height);
-}
 
 namespace core {
     class Window;
@@ -31,6 +25,16 @@ namespace core {
         // Matrices for compatibility with existing renderer
         math::Mat4 projectionMatrix;
         math::Mat4 viewMatrix;
+
+        // OpenGL resources for quad rendering
+        unsigned int quadVAO = 0;
+        unsigned int quadVBO = 0;
+        unsigned int simpleShaderProgram = 0;
+
+        // Private methods
+        void initializeQuadRendering();
+        void renderUnitQuad(const scene::DrawItem& item);
+        void cleanupQuadRendering();
 
     public:
         /**
