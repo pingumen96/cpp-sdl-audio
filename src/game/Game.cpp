@@ -6,19 +6,13 @@
 #include <SDL2/SDL_image.h>
 #include "../core/Renderer.h"
 #include "../core/Window.h"
-// Include new scene-based system instead of old states
+// Include unified scene-based system
 #include "MenuScene.h"
 #include "GameScene.h"
-// Keep old states for transition period
-#include "state/GameState.h"
-#include "state/MenuState.h"
-#include "state/PlayingState.h"
-#include "state/PausedState.h"
 
 game::Game::Game(core::Window& window)
     : renderer(window),
-    state(nullptr),
-    inputHandler(nullptr),
+    inputSystem(nullptr),
     avatar() {
     // Initialize the scene system
     initializeSceneSystem();
@@ -26,21 +20,22 @@ game::Game::Game(core::Window& window)
 game::Game::~Game() = default;
 
 void game::Game::init() {
-    // NEW: Initialize with scene-based system instead of state-based
+    // Initialize unified scene system
     if (sceneManager) {
         // Push initial menu scene
         auto menuScene = std::make_unique<MenuScene>();
         sceneManager->pushScene(std::move(menuScene));
-        std::cout << "[Game] Started with MenuScene (new system)" << std::endl;
+        std::cout << "[Game] Started with MenuScene" << std::endl;
     } else {
-        // FALLBACK: Use old state system if scene manager unavailable
-        setState<MenuState>();
-        std::cout << "[Game] Fallback to old MenuState system" << std::endl;
+        std::cerr << "[Game] Scene manager not available!" << std::endl;
+        return;
     }
 
-    // Initialize input handler
-    inputHandler = std::make_unique<input::InputHandler>();
-    inputHandler->loadBindings("data/keybindings.json", avatar);
+    // Initialize unified input system
+    inputSystem = std::make_unique<input::SceneInputSystem>();
+    inputSystem->loadBindings("data/keybindings.json");
+
+    std::cout << "[Game] Unified input system initialized" << std::endl;
 }
 
 void game::Game::mainLoop() {
@@ -71,56 +66,31 @@ void game::Game::mainLoop() {
             if (event.type == SDL_QUIT) {
                 running = false;
             } else {
-                // NEW: Handle input through scene system
-                handleSceneInput(event);
-
-                // FALLBACK: Old state system if scene manager unavailable
-                if (!sceneManager && state) {
-                    state->handleEvent(*this, event);
-                }
+                handleInput(event);
             }
         }
 
         // --- LOGIC UPDATE (fixed timestep) ---
         bool didUpdate = false;
         while (accumulator >= FIXED_TIMESTEP) {
-            // PRIMARY: Use scene system for updates
             if (sceneManager) {
                 sceneManager->update(FIXED_TIMESTEP);
-                didUpdate = true;
-            } else if (state) {
-                // FALLBACK: Old state system
-                state->update(*this, FIXED_TIMESTEP);
                 didUpdate = true;
             }
             accumulator -= FIXED_TIMESTEP;
         }
 
-        // --- RENDERING (variable framerate with interpolation) ---
-        if (didUpdate) {
-            // how much time has passed since the last logical update
-            float interpolation = accumulator / FIXED_TIMESTEP;
-
-            // clamp the interpolation between 0 and 1 for safety
-            interpolation = std::clamp(interpolation, 0.0f, 1.0f);
-
-            // PRIMARY: Use scene system for rendering
-            if (sceneManager) {
-                sceneManager->render();
-            } else if (state) {
-                // FALLBACK: Old state-based rendering
-                state->render(*this, interpolation);
-            }
-
-            didUpdate = false; // reset for the next cycle
-        } else if (!sceneManager) {
-            std::cerr << "[Game] No active state/scene to render!\n";
+        // --- RENDERING (variable framerate) ---
+        if (didUpdate && sceneManager) {
+            sceneManager->render();
+            didUpdate = false;
         }
 
         // little delay to avoid maxing out the CPU
         SDL_Delay(1);
     }
 }
+
 
 core::Renderer& game::Game::getRenderer() {
     return renderer;
@@ -152,41 +122,31 @@ void game::Game::initializeSceneSystem() {
     std::cout << "[Game] Scene system initialized successfully (using NullBackend for now)" << std::endl;
 }
 
-void game::Game::handleSceneInput(const SDL_Event& event) {
-    if (!sceneManager) return;
+void game::Game::handleInput(const SDL_Event& event) {
+    if (!sceneManager || !inputSystem) return;
 
     // Get current active scene
     auto* currentScene = sceneManager->getCurrentScene();
     if (!currentScene) return;
 
-    // Handle keyboard input for current scene
-    if (event.type == SDL_KEYDOWN) {
+    // Use unified input system
+    bool handled = inputSystem->handleInput(event, currentScene);
+
+    if (!handled && event.type == SDL_KEYDOWN) {
+        // Handle built-in scene transitions
         int keyCode = event.key.keysym.sym;
 
-        // Check scene type and forward input appropriately
         if (currentScene->getName() == "MenuScene") {
-            // Cast to MenuScene and handle menu input
-            if (auto* menuScene = dynamic_cast<MenuScene*>(currentScene)) {
-                menuScene->handleMenuInput(keyCode);
-
-                // Handle scene transitions
-                if (keyCode == SDLK_RETURN || keyCode == SDLK_KP_ENTER) {
-                    // Check if we should transition to game
-                    // This is a simplified version - in a real game you'd have better state management
-                    auto gameScene = std::make_unique<GameScene>();
-                    sceneManager->switchScene(std::move(gameScene));
-                }
+            if (keyCode == SDLK_RETURN || keyCode == SDLK_KP_ENTER) {
+                // Transition to game
+                auto gameScene = std::make_unique<GameScene>();
+                sceneManager->switchScene(std::move(gameScene));
             }
         } else if (currentScene->getName() == "GameScene") {
-            // Cast to GameScene and handle game input
-            if (auto* gameScene = dynamic_cast<GameScene*>(currentScene)) {
-                gameScene->handleGameInput(keyCode);
-
-                // Handle pause/menu
-                if (keyCode == SDLK_ESCAPE) {
-                    auto menuScene = std::make_unique<MenuScene>();
-                    sceneManager->pushScene(std::move(menuScene)); // Push menu on top
-                }
+            if (keyCode == SDLK_ESCAPE) {
+                // Return to menu
+                auto menuScene = std::make_unique<MenuScene>();
+                sceneManager->pushScene(std::move(menuScene));
             }
         }
     }

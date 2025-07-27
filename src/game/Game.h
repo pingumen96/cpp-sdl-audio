@@ -3,16 +3,16 @@
 #include <memory>
 #include <iostream>
 #include <SDL2/SDL.h>
-#include "input/InputHandler.h"
+#include "input/SceneInputSystem.h"
 #include "Avatar.h"
 #include "../core/Renderer.h"
 #include "../scene/SceneSystem.h"
 
-// Qui includi tutte le state complete! (Serve la definizione, non solo fwd)
-#include "state/GameState.h"
-#include "state/MenuState.h"
-#include "state/PlayingState.h"
-#include "state/PausedState.h"
+// Forward declarations for scenes (no longer need old states)
+namespace game {
+    class MenuScene;
+    class GameScene;
+}
 
 namespace core {
     class Window;
@@ -29,18 +29,13 @@ namespace game {
         ~Game();
 
         void init();
-
-        template<typename State, typename... Args>
-        void setState(Args&&... args) {
-            state = std::make_unique<State>(std::forward<Args>(args)...);
-            std::cout << "[Game] State -> " << state->name() << "\n";
-        }
-
         void mainLoop();
 
-        input::InputHandler& getInputHandler() {
-            return *inputHandler;
+        // Unified input system
+        input::SceneInputSystem& getInputSystem() {
+            return *inputSystem;
         }
+
         Avatar& getAvatar() {
             return avatar;
         }
@@ -51,16 +46,15 @@ namespace game {
         scene::SceneManager* getSceneManager() const { return sceneManager.get(); }
 
     private:
-        std::unique_ptr<GameState> state; // Stato di gioco attivo (DEPRECATED - use scenes)
-        std::unique_ptr<input::InputHandler> inputHandler;
-        Avatar avatar; // Il tuo avatar di gioco
-        core::Renderer renderer; // Renderer SDL2
+        // Unified input system (replaces old InputHandler)
+        std::unique_ptr<input::SceneInputSystem> inputSystem;
+        Avatar avatar; // The game avatar
+        core::Renderer renderer; // SDL2/OpenGL Renderer
 
-        // Scene system (PRIMARY)
+        // Scene system (PRIMARY - no more dual state/scene management)
         std::unique_ptr<scene::SceneManager> sceneManager;
 
         void initializeSceneSystem();
-        void handleSceneInput(const SDL_Event& event);
+        void handleInput(const SDL_Event& event);
     };
-
 } // namespace game
