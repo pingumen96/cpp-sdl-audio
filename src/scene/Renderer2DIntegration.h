@@ -2,7 +2,7 @@
 
 #include "rendering/Renderer2DImpl.h"
 #include "rendering/NullBackend.h"
-#include "systems/SpriteRenderSystem.h"
+#include "TestRenderer2D.h"
 #include "../resources/ResourceManager.h"
 #include <memory>
 #include <iostream>
@@ -15,6 +15,9 @@ namespace scene {
      * Questa classe dimostra come integrare il Renderer2D nel ciclo di vita
      * esistente (init → beginFrame → submit → present) senza "bucare"
      * la stratificazione già in uso.
+     * 
+     * NOTA: Per l'integrazione ECS, utilizzare direttamente ecs::systems::Renderer2DSystem
+     * nelle scene che ereditano da Scene2D.
      */
     class Renderer2DIntegrationExample {
     private:
@@ -25,8 +28,7 @@ namespace scene {
         // Componenti 2D
         std::unique_ptr<RenderQueueBuilder> renderQueueBuilder;
         std::unique_ptr<IRenderer2D> renderer2D;
-        std::unique_ptr<SpriteRenderSystem> spriteSystem;
-        std::unique_ptr<SimpleRenderTest> testSystem;
+        std::unique_ptr<TestRenderer2D> testSystem;
 
         // Stato
         bool initialized = false;
@@ -73,11 +75,8 @@ namespace scene {
                 return false;
             }
 
-            // 5. Crea i sistemi di test
-            spriteSystem = std::make_unique<SpriteRenderSystem>();
-            spriteSystem->init(*renderer2D);
-
-            testSystem = std::make_unique<SimpleRenderTest>(*renderer2D);
+            // 5. Crea sistema di test
+            testSystem = std::make_unique<TestRenderer2D>(*renderer2D);
             testSystem->createTestScene();
 
             initialized = true;
@@ -105,12 +104,9 @@ namespace scene {
             // === FASE 2: Clear del RenderQueueBuilder ===
             renderQueueBuilder->clear();
 
-            // === FASE 3: Esecuzione dei sistemi di rendering ===
-
-            // Sistema sprite (ECS-based) - per ora vuoto, ma il pattern è qui
-            spriteSystem->update(/* ecsManager */);
-
-            // Sistema di test (standalone)
+            // === FASE 3: Esecuzione del sistema di test ===
+            // NOTA: Per l'integrazione ECS reale, utilizzare ecs::systems::Renderer2DSystem
+            // che viene gestito automaticamente dalle Scene2D
             testSystem->render();
 
             // === FASE 4: Flush del RenderQueueBuilder ===
@@ -156,7 +152,6 @@ namespace scene {
             std::cout << "[Renderer2D Integration] Shutting down..." << std::endl;
 
             testSystem.reset();
-            spriteSystem.reset();
 
             if (renderer2D) {
                 renderer2D->shutdown();
@@ -197,7 +192,7 @@ namespace scene {
          * @brief Accesso ai componenti per test avanzati
          */
         IRenderer2D* getRenderer2D() { return renderer2D.get(); }
-        SimpleRenderTest* getTestSystem() { return testSystem.get(); }
+        TestRenderer2D* getTestSystem() { return testSystem.get(); }
         IRenderBackend* getRenderBackend() { return renderBackend.get(); }
 
         bool isInitialized() const { return initialized; }
