@@ -146,7 +146,8 @@ namespace scene {
     private:
         void updateViewMatrix() const {
             // View = T * R * S
-            math::Matrix4f translation = math::Matrix4f::translation(-position.x(), -position.y(), 0.0f);
+            // For 2D rendering, we need to position the camera "back" to see objects at Z=0
+            math::Matrix4f translation = math::Matrix4f::translation(-position.x(), -position.y(), -5.0f);
             math::Matrix4f scale = math::Matrix4f::scale(zoom, zoom, 1.0f);
             math::Matrix4f rotate = math::Matrix4f::rotationZ(-rotation);
 
@@ -159,7 +160,7 @@ namespace scene {
             projectionMatrix = math::Matrix4f::ortho(
                 -halfWidth, halfWidth,
                 -halfHeight, halfHeight,
-                -1.0f, 1.0f
+                -100.0f, 100.0f  // Much wider Z range to accommodate camera positioning
             );
         }
     };

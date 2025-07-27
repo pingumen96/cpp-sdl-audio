@@ -350,11 +350,16 @@ namespace scene {
 
         // Calculate view matrix
         math::Vec3f target = camera.position + camera.forward;
-        camera.viewMatrix = math::lookAt(camera.position, target, camera.up);
+        //camera.viewMatrix = math::lookAt(camera.position, target, camera.up);
 
         // Calculate projection matrix
         float aspect = static_cast<float>(renderWidth) / static_cast<float>(renderHeight);
-        camera.projectionMatrix = math::perspective(math::radians(camera.fov), aspect, camera.nearPlane, camera.farPlane);
+        //camera.projectionMatrix = math::perspective(math::radians(camera.fov), aspect, camera.nearPlane, camera.farPlane);
+        camera.projectionMatrix =
+            math::Mat4::ortho(-400.f, 400.f,   // left, right
+                -300.f, 300.f,   // bottom, top
+                -1.f, 1.f);      // near,  far
+        camera.viewMatrix = math::Mat4::identity();
 
         return camera;
     }

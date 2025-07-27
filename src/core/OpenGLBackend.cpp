@@ -26,13 +26,14 @@ namespace core {
         setViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
 
         // Set up default projection matrix (2D orthographic) - centered like Camera2D
+        // Use a wider Z range to accommodate camera positioning
         float halfWidth = static_cast<float>(width) * 0.5f;
         float halfHeight = static_cast<float>(height) * 0.5f;
         projectionMatrix = math::Mat4::ortho(-halfWidth, halfWidth,
             -halfHeight, halfHeight,
-            -1.0f, 1.0f);
+            -100.0f, 100.0f);  // Much wider Z range for 2D
 
-        std::cout << "[OpenGLBackend] Projection matrix (ortho -" << halfWidth << " to " << halfWidth << ", -" << halfHeight << " to " << halfHeight << "):" << std::endl;
+        std::cout << "[OpenGLBackend] Projection matrix (ortho -" << halfWidth << " to " << halfWidth << ", -" << halfHeight << " to " << halfHeight << ", Z: -100 to +100):" << std::endl;
         for (int i = 0; i < 4; i++) {
             std::cout << "  [" << projectionMatrix(i, 0) << ", " << projectionMatrix(i, 1)
                 << ", " << projectionMatrix(i, 2) << ", " << projectionMatrix(i, 3) << "]" << std::endl;
@@ -44,6 +45,15 @@ namespace core {
         // Set default clear color to dark gray to see objects better
         setDrawColor(0.1f, 0.1f, 0.1f, 1.0f);
         std::cout << "[OpenGLBackend] Clear color set to dark gray (0.1, 0.1, 0.1, 1.0)" << std::endl;
+
+        // Enable depth testing for proper 2D layering
+        glDisable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        std::cout << "[OpenGLBackend] Depth testing enabled" << std::endl;
+
+        // Disable backface culling for 2D quads
+        glDisable(GL_CULL_FACE);
+        std::cout << "[OpenGLBackend] Backface culling disabled" << std::endl;
 
         // Initialize quad rendering resources
         initializeQuadRendering();
@@ -147,11 +157,12 @@ namespace core {
         setViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
 
         // Update projection matrix to match Camera2D style (centered)
+        // Use a wider Z range to accommodate camera positioning
         float halfWidth = static_cast<float>(width) * 0.5f;
         float halfHeight = static_cast<float>(height) * 0.5f;
         projectionMatrix = math::Mat4::ortho(-halfWidth, halfWidth,
             -halfHeight, halfHeight,
-            -1.0f, 1.0f);
+            -100.0f, 100.0f);  // Much wider Z range for 2D
 
         return true;
     }
@@ -255,6 +266,17 @@ namespace core {
         glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
         glCompileShader(fragmentShader);
 
+        GLint ok;
+        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &ok);
+        if (!ok) {
+            char log[1024];
+            glGetShaderInfoLog(vertexShader, 1024, nullptr, log);
+            std::cout << "[SHADER] Vertex compile error:\n" << log << std::endl;
+
+            // crash
+            throw std::runtime_error("Vertex shader compilation failed");
+        }
+
         // Create shader program
         simpleShaderProgram = glCreateProgram();
         glAttachShader(simpleShaderProgram, vertexShader);
@@ -269,6 +291,14 @@ namespace core {
     void OpenGLBackend::renderUnitQuad(const scene::DrawItem& item) {
         // Use our simple shader
         glUseProgram(simpleShaderProgram);
+
+        // Check for shader program validity
+        GLint valid;
+        glValidateProgram(simpleShaderProgram);
+        glGetProgramiv(simpleShaderProgram, GL_VALIDATE_STATUS, &valid);
+        if (!valid) {
+            std::cout << "[OpenGLBackend] WARNING: Shader program validation failed!" << std::endl;
+        }
 
         // Extract position and scale from model matrix for debugging
         float posX = item.modelMatrix(0, 3);
@@ -286,9 +316,19 @@ namespace core {
         std::cout << std::endl;
 
         // Set matrices
-        glUniformMatrix4fv(glGetUniformLocation(simpleShaderProgram, "model"), 1, GL_FALSE, item.modelMatrix.data());
-        glUniformMatrix4fv(glGetUniformLocation(simpleShaderProgram, "view"), 1, GL_FALSE, viewMatrix.data());
-        glUniformMatrix4fv(glGetUniformLocation(simpleShaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.data());
+        GLint modelLoc = glGetUniformLocation(simpleShaderProgram, "model");
+        GLint viewLoc = glGetUniformLocation(simpleShaderProgram, "view");
+        GLint projLoc = glGetUniformLocation(simpleShaderProgram, "projection");
+        GLint colorLoc = glGetUniformLocation(simpleShaderProgram, "color");
+
+        if (modelLoc == -1 || viewLoc == -1 || projLoc == -1 || colorLoc == -1) {
+            std::cout << "[OpenGLBackend] WARNING: Some uniform locations not found! model=" << modelLoc
+                << " view=" << viewLoc << " proj=" << projLoc << " color=" << colorLoc << std::endl;
+        }
+
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, item.modelMatrix.data());
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMatrix.data());
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, projectionMatrix.data());
 
         // Use different colors based on layer and position
         float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
@@ -299,7 +339,7 @@ namespace core {
             std::cout << "  -> Center line (white)" << std::endl;
         } else if (item.renderLayer == 2) {
             // Paddles - distinguish by position
-            if (posX < 400.0f) {
+            if (posX < 0.0f) {
                 // Left paddle - red
                 r = 1.0f; g = 0.2f; b = 0.2f;
                 std::cout << "  -> Left paddle (red)" << std::endl;
@@ -318,7 +358,7 @@ namespace core {
             std::cout << "  -> Unknown layer " << item.renderLayer << " (cyan)" << std::endl;
         }
 
-        glUniform4f(glGetUniformLocation(simpleShaderProgram, "color"), r, g, b, a);
+        glUniform4f(colorLoc, r, g, b, a);
 
         // Check for OpenGL errors before drawing
         GLenum error = glGetError();
@@ -326,10 +366,24 @@ namespace core {
             std::cout << "[OpenGLBackend] OpenGL error before draw: " << error << std::endl;
         }
 
+        // Enable wireframe mode temporarily to see if geometry is being drawn
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         // Draw the quad
         glBindVertexArray(quadVAO);
+
+        // Verify VAO is valid
+        GLint currentVAO;
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+        if (currentVAO != quadVAO) {
+            std::cout << "[OpenGLBackend] WARNING: VAO binding failed! Expected " << quadVAO << " got " << currentVAO << std::endl;
+        }
+
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
+
+        // Reset to fill mode
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Check for OpenGL errors after drawing
         error = glGetError();

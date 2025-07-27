@@ -170,10 +170,10 @@ namespace game {
             auto& leftTransform = coordinator->getComponent<ecs::components::Transform>(leftPaddleEntity);
 
             if (leftPaddleUp) {
-                leftTransform.position.y() -= PADDLE_SPEED * deltaTime;
+                leftTransform.position.y() += PADDLE_SPEED * deltaTime; // Fixed: up should increase Y
             }
             if (leftPaddleDown) {
-                leftTransform.position.y() += PADDLE_SPEED * deltaTime;
+                leftTransform.position.y() -= PADDLE_SPEED * deltaTime; // Fixed: down should decrease Y
             }
 
             // Keep paddle within screen bounds (centered coordinates: -300 to +300 for Y)
@@ -187,10 +187,10 @@ namespace game {
             auto& rightTransform = coordinator->getComponent<ecs::components::Transform>(rightPaddleEntity);
 
             if (rightPaddleUp) {
-                rightTransform.position.y() -= PADDLE_SPEED * deltaTime;
+                rightTransform.position.y() += PADDLE_SPEED * deltaTime; // Fixed: up should increase Y
             }
             if (rightPaddleDown) {
-                rightTransform.position.y() += PADDLE_SPEED * deltaTime;
+                rightTransform.position.y() -= PADDLE_SPEED * deltaTime; // Fixed: down should decrease Y
             }
 
             // Keep paddle within screen bounds (centered coordinates: -300 to +300 for Y)
@@ -212,7 +212,7 @@ namespace game {
         ballTransform.position.y() += ballVelocity.linear.y() * deltaTime;
 
         // Check collision with top and bottom walls (centered coordinates: -300 to +300 for Y)
-        float ballHalfSize = (BALL_SIZE * 3) / 2; // Account for bigger ball
+        float ballHalfSize = (BALL_SIZE * 3) / 2; // Account for scaled ball size
         if (ballTransform.position.y() <= -300.0f + ballHalfSize) {
             ballTransform.position.y() = -300.0f + ballHalfSize;
             ballVelocity.linear.y() = -ballVelocity.linear.y();
@@ -243,11 +243,11 @@ namespace game {
             auto& ballVelocity = coordinator->getComponent<ecs::components::Velocity>(ballEntity);
             auto& paddleTransform = coordinator->getComponent<ecs::components::Transform>(leftPaddleEntity);
 
-            // Calculate bounce direction
+            // Calculate bounce direction using actual paddle size
             math::Vec2f ballPos2D(ballTransform.position.x(), ballTransform.position.y());
             math::Vec2f paddlePos2D(paddleTransform.position.x(), paddleTransform.position.y());
             math::Vec2f bounceDir = calculateBallBounce(ballPos2D, paddlePos2D,
-                math::Vec2f(PADDLE_WIDTH, PADDLE_HEIGHT));
+                math::Vec2f(PADDLE_WIDTH * 2, PADDLE_HEIGHT * 1.5f)); // Use actual scaled size
 
             // Increase speed slightly and apply new direction
             float currentSpeed = std::sqrt(ballVelocity.linear.x() * ballVelocity.linear.x() +
@@ -255,8 +255,10 @@ namespace game {
             ballVelocity.linear.x() = bounceDir.x() * (currentSpeed * BALL_SPEED_INCREASE);
             ballVelocity.linear.y() = bounceDir.y() * (currentSpeed * BALL_SPEED_INCREASE);
 
-            // Ensure ball is not inside paddle
-            ballTransform.position.x() = paddleTransform.position.x() + PADDLE_WIDTH / 2 + BALL_SIZE / 2;
+            // Ensure ball is not inside paddle - use actual scaled sizes
+            float paddleHalfWidth = (PADDLE_WIDTH * 2) / 2;
+            float ballHalfSize = (BALL_SIZE * 3) / 2;
+            ballTransform.position.x() = paddleTransform.position.x() + paddleHalfWidth + ballHalfSize;
         }
 
         // Check collision with right paddle
@@ -265,11 +267,11 @@ namespace game {
             auto& ballVelocity = coordinator->getComponent<ecs::components::Velocity>(ballEntity);
             auto& paddleTransform = coordinator->getComponent<ecs::components::Transform>(rightPaddleEntity);
 
-            // Calculate bounce direction
+            // Calculate bounce direction using actual paddle size
             math::Vec2f ballPos2D(ballTransform.position.x(), ballTransform.position.y());
             math::Vec2f paddlePos2D(paddleTransform.position.x(), paddleTransform.position.y());
             math::Vec2f bounceDir = calculateBallBounce(ballPos2D, paddlePos2D,
-                math::Vec2f(PADDLE_WIDTH, PADDLE_HEIGHT));
+                math::Vec2f(PADDLE_WIDTH * 2, PADDLE_HEIGHT * 1.5f)); // Use actual scaled size
 
             // Increase speed slightly and apply new direction
             float currentSpeed = std::sqrt(ballVelocity.linear.x() * ballVelocity.linear.x() +
@@ -277,8 +279,10 @@ namespace game {
             ballVelocity.linear.x() = bounceDir.x() * (currentSpeed * BALL_SPEED_INCREASE);
             ballVelocity.linear.y() = bounceDir.y() * (currentSpeed * BALL_SPEED_INCREASE);
 
-            // Ensure ball is not inside paddle
-            ballTransform.position.x() = paddleTransform.position.x() - PADDLE_WIDTH / 2 - BALL_SIZE / 2;
+            // Ensure ball is not inside paddle - use actual scaled sizes
+            float paddleHalfWidth = (PADDLE_WIDTH * 2) / 2;
+            float ballHalfSize = (BALL_SIZE * 3) / 2;
+            ballTransform.position.x() = paddleTransform.position.x() - paddleHalfWidth - ballHalfSize;
         }
     }
 
@@ -378,16 +382,21 @@ namespace game {
         const auto& ballTransform = coordinator->getComponent<ecs::components::Transform>(ballEntity);
         const auto& paddleTransform = coordinator->getComponent<ecs::components::Transform>(paddleEntity);
 
-        // Simple AABB collision detection
-        float ballLeft = ballTransform.position.x() - BALL_SIZE / 2;
-        float ballRight = ballTransform.position.x() + BALL_SIZE / 2;
-        float ballTop = ballTransform.position.y() - BALL_SIZE / 2;
-        float ballBottom = ballTransform.position.y() + BALL_SIZE / 2;
+        // Use actual rendered sizes (accounting for scaling)
+        float ballSize = BALL_SIZE * 3; // Ball is scaled 3x
+        float paddleWidth = PADDLE_WIDTH * 2; // Paddle is scaled 2x
+        float paddleHeight = PADDLE_HEIGHT * 1.5f; // Paddle is scaled 1.5x
 
-        float paddleLeft = paddleTransform.position.x() - PADDLE_WIDTH / 2;
-        float paddleRight = paddleTransform.position.x() + PADDLE_WIDTH / 2;
-        float paddleTop = paddleTransform.position.y() - PADDLE_HEIGHT / 2;
-        float paddleBottom = paddleTransform.position.y() + PADDLE_HEIGHT / 2;
+        // Simple AABB collision detection
+        float ballLeft = ballTransform.position.x() - ballSize / 2;
+        float ballRight = ballTransform.position.x() + ballSize / 2;
+        float ballTop = ballTransform.position.y() - ballSize / 2;
+        float ballBottom = ballTransform.position.y() + ballSize / 2;
+
+        float paddleLeft = paddleTransform.position.x() - paddleWidth / 2;
+        float paddleRight = paddleTransform.position.x() + paddleWidth / 2;
+        float paddleTop = paddleTransform.position.y() - paddleHeight / 2;
+        float paddleBottom = paddleTransform.position.y() + paddleHeight / 2;
 
         return (ballLeft < paddleRight && ballRight > paddleLeft &&
             ballTop < paddleBottom && ballBottom > paddleTop);
