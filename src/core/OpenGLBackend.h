@@ -35,6 +35,7 @@ namespace core {
         void initializeQuadRendering();
         void renderUnitQuad(const scene::DrawItem& item);
         void cleanupQuadRendering();
+        bool isQuadInViewport(float posX, float posY, float scaleX, float scaleY) const;
 
     public:
         /**

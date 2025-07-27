@@ -276,7 +276,14 @@ namespace core {
         float scaleX = item.modelMatrix(0, 0);
         float scaleY = item.modelMatrix(1, 1);
 
-        std::cout << "[OpenGLBackend] Rendering quad at (" << posX << ", " << posY << ") scale(" << scaleX << ", " << scaleY << ") layer=" << item.renderLayer << std::endl;
+        // Check if quad is in viewport bounds
+        bool inViewport = isQuadInViewport(posX, posY, scaleX, scaleY);
+
+        std::cout << "[OpenGLBackend] Rendering quad at (" << posX << ", " << posY << ") scale(" << scaleX << ", " << scaleY << ") layer=" << item.renderLayer;
+        if (!inViewport) {
+            std::cout << " [WARNING: OUTSIDE VIEWPORT!]";
+        }
+        std::cout << std::endl;
 
         // Set matrices
         glUniformMatrix4fv(glGetUniformLocation(simpleShaderProgram, "model"), 1, GL_FALSE, item.modelMatrix.data());
@@ -344,6 +351,37 @@ namespace core {
             glDeleteProgram(simpleShaderProgram);
             simpleShaderProgram = 0;
         }
+    }
+
+    bool OpenGLBackend::isQuadInViewport(float posX, float posY, float scaleX, float scaleY) const {
+        // Calculate the bounds of the viewport
+        // Our projection is orthographic from -400 to +400 (width) and -300 to +300 (height)
+        float viewportLeft = -400.0f;
+        float viewportRight = 400.0f;
+        float viewportBottom = -300.0f;
+        float viewportTop = 300.0f;
+
+        // Calculate the bounds of the quad (unit quad scaled and positioned)
+        float halfWidth = scaleX * 0.5f;
+        float halfHeight = scaleY * 0.5f;
+
+        float quadLeft = posX - halfWidth;
+        float quadRight = posX + halfWidth;
+        float quadBottom = posY - halfHeight;
+        float quadTop = posY + halfHeight;
+
+        // Check if quad overlaps with viewport
+        bool overlapsX = (quadRight >= viewportLeft && quadLeft <= viewportRight);
+        bool overlapsY = (quadTop >= viewportBottom && quadBottom <= viewportTop);
+
+        bool inViewport = overlapsX && overlapsY;
+
+        // Debug output
+        std::cout << "    [Viewport Debug] Quad bounds: [" << quadLeft << ", " << quadBottom << "] to [" << quadRight << ", " << quadTop << "]" << std::endl;
+        std::cout << "    [Viewport Debug] Viewport bounds: [" << viewportLeft << ", " << viewportBottom << "] to [" << viewportRight << ", " << viewportTop << "]" << std::endl;
+        std::cout << "    [Viewport Debug] Overlaps X: " << (overlapsX ? "YES" : "NO") << ", Overlaps Y: " << (overlapsY ? "YES" : "NO") << std::endl;
+
+        return inViewport;
     }
 
 }

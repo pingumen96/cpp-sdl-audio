@@ -97,11 +97,12 @@ namespace game {
     void PongScene::createGameEntities() {
         std::cout << "[PongScene] Creating game entities..." << std::endl;
 
-        // Remove background entity - let default clear color show through
+        // Convert from absolute coordinates (0-800, 0-600) to centered coordinates (-400 to +400, -300 to +300)
+        // Center = (0, 0), Left edge = -400, Right edge = +400, Top edge = +300, Bottom edge = -300
 
         // Create center line - make it more visible
         centerLineEntity = createSprite(
-            math::Vec2f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2),
+            math::Vec2f(0.0f, 0.0f), // Center of screen in centered coordinates
             math::Vec2f(4.0f, SCREEN_HEIGHT * 0.8f), // Thicker and shorter line
             "", // No texture
             scene::Color::White,
@@ -111,7 +112,7 @@ namespace game {
 
         // Create left paddle - make it bigger and more visible
         leftPaddleEntity = createSprite(
-            math::Vec2f(50.0f, SCREEN_HEIGHT / 2), // Further from edge
+            math::Vec2f(-350.0f, 0.0f), // Left side in centered coordinates (50px from left edge)
             math::Vec2f(PADDLE_WIDTH * 2, PADDLE_HEIGHT * 1.5f), // Make it bigger
             "", // No texture
             scene::Color::Red, // Red color for visibility
@@ -121,7 +122,7 @@ namespace game {
 
         // Create right paddle - make it bigger and more visible
         rightPaddleEntity = createSprite(
-            math::Vec2f(SCREEN_WIDTH - 50.0f, SCREEN_HEIGHT / 2), // Further from edge
+            math::Vec2f(350.0f, 0.0f), // Right side in centered coordinates (50px from right edge)
             math::Vec2f(PADDLE_WIDTH * 2, PADDLE_HEIGHT * 1.5f), // Make it bigger
             "", // No texture
             scene::Color::Blue, // Blue color for visibility
@@ -131,7 +132,7 @@ namespace game {
 
         // Create ball - make it bigger
         ballEntity = createSprite(
-            math::Vec2f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2),
+            math::Vec2f(0.0f, 0.0f), // Center of screen in centered coordinates
             math::Vec2f(BALL_SIZE * 3, BALL_SIZE * 3), // Make it 3x bigger
             "", // No texture
             scene::Color::Green, // Green color for visibility
@@ -175,9 +176,10 @@ namespace game {
                 leftTransform.position.y() += PADDLE_SPEED * deltaTime;
             }
 
-            // Keep paddle within screen bounds
-            leftTransform.position.y() = std::max(PADDLE_HEIGHT / 2,
-                std::min(SCREEN_HEIGHT - PADDLE_HEIGHT / 2, leftTransform.position.y()));
+            // Keep paddle within screen bounds (centered coordinates: -300 to +300 for Y)
+            float paddleHalfHeight = (PADDLE_HEIGHT * 1.5f) / 2; // Account for bigger paddle
+            leftTransform.position.y() = std::max(-300.0f + paddleHalfHeight,
+                std::min(300.0f - paddleHalfHeight, leftTransform.position.y()));
         }
 
         // Update right paddle
@@ -191,9 +193,10 @@ namespace game {
                 rightTransform.position.y() += PADDLE_SPEED * deltaTime;
             }
 
-            // Keep paddle within screen bounds
-            rightTransform.position.y() = std::max(PADDLE_HEIGHT / 2,
-                std::min(SCREEN_HEIGHT - PADDLE_HEIGHT / 2, rightTransform.position.y()));
+            // Keep paddle within screen bounds (centered coordinates: -300 to +300 for Y)
+            float paddleHalfHeight = (PADDLE_HEIGHT * 1.5f) / 2; // Account for bigger paddle
+            rightTransform.position.y() = std::max(-300.0f + paddleHalfHeight,
+                std::min(300.0f - paddleHalfHeight, rightTransform.position.y()));
         }
     }
 
@@ -208,21 +211,22 @@ namespace game {
         ballTransform.position.x() += ballVelocity.linear.x() * deltaTime;
         ballTransform.position.y() += ballVelocity.linear.y() * deltaTime;
 
-        // Check collision with top and bottom walls
-        if (ballTransform.position.y() <= BALL_SIZE / 2) {
-            ballTransform.position.y() = BALL_SIZE / 2;
+        // Check collision with top and bottom walls (centered coordinates: -300 to +300 for Y)
+        float ballHalfSize = (BALL_SIZE * 3) / 2; // Account for bigger ball
+        if (ballTransform.position.y() <= -300.0f + ballHalfSize) {
+            ballTransform.position.y() = -300.0f + ballHalfSize;
             ballVelocity.linear.y() = -ballVelocity.linear.y();
-        } else if (ballTransform.position.y() >= SCREEN_HEIGHT - BALL_SIZE / 2) {
-            ballTransform.position.y() = SCREEN_HEIGHT - BALL_SIZE / 2;
+        } else if (ballTransform.position.y() >= 300.0f - ballHalfSize) {
+            ballTransform.position.y() = 300.0f - ballHalfSize;
             ballVelocity.linear.y() = -ballVelocity.linear.y();
         }
 
-        // Check if ball went off screen (scoring)
-        if (ballTransform.position.x() < -BALL_SIZE) {
+        // Check if ball went off screen (scoring) - centered coordinates: -400 to +400 for X
+        if (ballTransform.position.x() < -400.0f - ballHalfSize) {
             // Right player scores
             rightScore++;
             resetBall();
-        } else if (ballTransform.position.x() > SCREEN_WIDTH + BALL_SIZE) {
+        } else if (ballTransform.position.x() > 400.0f + ballHalfSize) {
             // Left player scores
             leftScore++;
             resetBall();
@@ -285,8 +289,8 @@ namespace game {
         auto& ballTransform = coordinator->getComponent<ecs::components::Transform>(ballEntity);
         auto& ballVelocity = coordinator->getComponent<ecs::components::Velocity>(ballEntity);
 
-        // Reset position to center
-        ballTransform.position = math::Vec3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0.0f);
+        // Reset position to center (centered coordinates)
+        ballTransform.position = math::Vec3f(0.0f, 0.0f, 0.0f);
 
         // Reset velocity with random direction
         math::Vec2f initialDir = getBallDirection();
@@ -407,8 +411,8 @@ namespace game {
         // Calculate bounce angle based on hit position
         float bounceAngle = hitPos * (static_cast<float>(M_PI) / 4); // Max 45 degrees
 
-        // Determine horizontal direction based on which paddle
-        float horizontalDir = (paddlePos.x() < SCREEN_WIDTH / 2) ? 1.0f : -1.0f;
+        // Determine horizontal direction based on which paddle (centered coordinates)
+        float horizontalDir = (paddlePos.x() < 0.0f) ? 1.0f : -1.0f;
 
         math::Vec2f bounceDir(horizontalDir * std::cos(bounceAngle), std::sin(bounceAngle));
         return bounceDir.normalized();
