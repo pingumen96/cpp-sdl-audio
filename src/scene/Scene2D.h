@@ -82,11 +82,16 @@ namespace scene {
             Camera2D camera;
             camera.setViewportSize(math::Vec2f(800.0f, 600.0f)); // TODO: Get actual viewport size
 
-            // Position camera to match game coordinate system (center at screen center)
-            camera.setPosition(math::Vec2f(400.0f, 300.0f)); // Center camera at screen center for Pong
+            // Position camera at origin since projection is centered (-400 to 400, -300 to 300)
+            camera.setPosition(math::Vec2f(0.0f, 0.0f)); // Origin for centered projection
+
+            std::cout << "[Scene2D] Camera setup:" << std::endl;
+            std::cout << "  Viewport: 800x600" << std::endl;
+            std::cout << "  Position: (0, 0) - centered projection" << std::endl;
 
             // Begin 2D scene
             renderer2D->beginScene(camera);
+            std::cout << "[Scene2D] beginScene called with camera" << std::endl;
 
             // Let ECS systems render (Renderer2DSystem will handle entities)
             if (renderSystem2D) {

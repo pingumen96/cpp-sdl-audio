@@ -57,11 +57,13 @@ namespace ecs::systems {
                 rect.size.x() *= transform.scale.x();
                 rect.size.y() *= transform.scale.y();
 
-                // Submit to renderer (note: base interface doesn't support rotation yet)
+                // Submit to renderer with layer support
                 renderer2D->drawRect(
                     rect,
                     renderable.color,
-                    renderable.textureId
+                    0.0f,  // rotation (using transform.rotation in future)
+                    renderable.textureId,
+                    renderable.layer
                 );
             }
         }

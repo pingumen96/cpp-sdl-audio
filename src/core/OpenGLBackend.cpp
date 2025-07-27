@@ -20,24 +20,36 @@ namespace core {
         this->width = w;
         this->height = h;
 
+        std::cout << "[OpenGLBackend] Initializing with dimensions: " << w << "x" << h << std::endl;
+
         // Set initial viewport
         setViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
 
-        // Set up default projection matrix (2D orthographic)
-        projectionMatrix = math::Mat4::ortho(0.0f, static_cast<float>(width),
-            static_cast<float>(height), 0.0f,
+        // Set up default projection matrix (2D orthographic) - centered like Camera2D
+        float halfWidth = static_cast<float>(width) * 0.5f;
+        float halfHeight = static_cast<float>(height) * 0.5f;
+        projectionMatrix = math::Mat4::ortho(-halfWidth, halfWidth,
+            -halfHeight, halfHeight,
             -1.0f, 1.0f);
+
+        std::cout << "[OpenGLBackend] Projection matrix (ortho -" << halfWidth << " to " << halfWidth << ", -" << halfHeight << " to " << halfHeight << "):" << std::endl;
+        for (int i = 0; i < 4; i++) {
+            std::cout << "  [" << projectionMatrix(i, 0) << ", " << projectionMatrix(i, 1)
+                << ", " << projectionMatrix(i, 2) << ", " << projectionMatrix(i, 3) << "]" << std::endl;
+        }
 
         // Set up identity view matrix
         viewMatrix = math::Mat4::identity();
 
         // Set default clear color to dark gray to see objects better
         setDrawColor(0.1f, 0.1f, 0.1f, 1.0f);
+        std::cout << "[OpenGLBackend] Clear color set to dark gray (0.1, 0.1, 0.1, 1.0)" << std::endl;
 
         // Initialize quad rendering resources
         initializeQuadRendering();
 
         initialized = true;
+        std::cout << "[OpenGLBackend] Initialization complete" << std::endl;
         return true;
     }
 
@@ -62,6 +74,18 @@ namespace core {
         const auto& camera = commandBuffer.getCamera();
         setProjectionMatrix(camera.projectionMatrix);
         setViewMatrix(camera.viewMatrix);
+
+        std::cout << "[OpenGLBackend] Camera matrices received:" << std::endl;
+        std::cout << "  Projection:" << std::endl;
+        for (int i = 0; i < 4; i++) {
+            std::cout << "    [" << camera.projectionMatrix(i, 0) << ", " << camera.projectionMatrix(i, 1)
+                << ", " << camera.projectionMatrix(i, 2) << ", " << camera.projectionMatrix(i, 3) << "]" << std::endl;
+        }
+        std::cout << "  View:" << std::endl;
+        for (int i = 0; i < 4; i++) {
+            std::cout << "    [" << camera.viewMatrix(i, 0) << ", " << camera.viewMatrix(i, 1)
+                << ", " << camera.viewMatrix(i, 2) << ", " << camera.viewMatrix(i, 3) << "]" << std::endl;
+        }
 
         // Process draw items - Actual rendering implementation
         const auto& drawItems = commandBuffer.getDrawItems();
@@ -122,9 +146,11 @@ namespace core {
 
         setViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
 
-        // Update projection matrix
-        projectionMatrix = math::Mat4::ortho(0.0f, static_cast<float>(width),
-            static_cast<float>(height), 0.0f,
+        // Update projection matrix to match Camera2D style (centered)
+        float halfWidth = static_cast<float>(width) * 0.5f;
+        float halfHeight = static_cast<float>(height) * 0.5f;
+        projectionMatrix = math::Mat4::ortho(-halfWidth, halfWidth,
+            -halfHeight, halfHeight,
             -1.0f, 1.0f);
 
         return true;
@@ -244,6 +270,14 @@ namespace core {
         // Use our simple shader
         glUseProgram(simpleShaderProgram);
 
+        // Extract position and scale from model matrix for debugging
+        float posX = item.modelMatrix(0, 3);
+        float posY = item.modelMatrix(1, 3);
+        float scaleX = item.modelMatrix(0, 0);
+        float scaleY = item.modelMatrix(1, 1);
+
+        std::cout << "[OpenGLBackend] Rendering quad at (" << posX << ", " << posY << ") scale(" << scaleX << ", " << scaleY << ") layer=" << item.renderLayer << std::endl;
+
         // Set matrices
         glUniformMatrix4fv(glGetUniformLocation(simpleShaderProgram, "model"), 1, GL_FALSE, item.modelMatrix.data());
         glUniformMatrix4fv(glGetUniformLocation(simpleShaderProgram, "view"), 1, GL_FALSE, viewMatrix.data());
@@ -252,36 +286,49 @@ namespace core {
         // Use different colors based on layer and position
         float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
 
-        // Extract position from model matrix for more specific identification
-        float posX = item.modelMatrix(0, 3);
-        float posY = item.modelMatrix(1, 3);
-
         if (item.renderLayer == 1) {
             // Center line - white
             r = 1.0f; g = 1.0f; b = 1.0f;
+            std::cout << "  -> Center line (white)" << std::endl;
         } else if (item.renderLayer == 2) {
             // Paddles - distinguish by position
             if (posX < 400.0f) {
                 // Left paddle - red
                 r = 1.0f; g = 0.2f; b = 0.2f;
+                std::cout << "  -> Left paddle (red)" << std::endl;
             } else {
                 // Right paddle - blue
                 r = 0.2f; g = 0.4f; b = 1.0f;
+                std::cout << "  -> Right paddle (blue)" << std::endl;
             }
         } else if (item.renderLayer == 3) {
             // Ball - yellow/green
             r = 0.2f; g = 1.0f; b = 0.2f;
+            std::cout << "  -> Ball (green)" << std::endl;
         } else {
             // Fallback - cyan
             r = 0.0f; g = 1.0f; b = 1.0f;
+            std::cout << "  -> Unknown layer " << item.renderLayer << " (cyan)" << std::endl;
         }
 
         glUniform4f(glGetUniformLocation(simpleShaderProgram, "color"), r, g, b, a);
+
+        // Check for OpenGL errors before drawing
+        GLenum error = glGetError();
+        if (error != GL_NO_ERROR) {
+            std::cout << "[OpenGLBackend] OpenGL error before draw: " << error << std::endl;
+        }
 
         // Draw the quad
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
+
+        // Check for OpenGL errors after drawing
+        error = glGetError();
+        if (error != GL_NO_ERROR) {
+            std::cout << "[OpenGLBackend] OpenGL error after draw: " << error << std::endl;
+        }
     }
 
     void OpenGLBackend::cleanupQuadRendering() {

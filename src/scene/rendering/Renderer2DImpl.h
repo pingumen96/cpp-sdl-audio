@@ -182,7 +182,7 @@ namespace scene {
          * @brief Disegna un rettangolo con rotazione
          */
         void drawRect(const Rect2D& rect, const Color& color, float rotation,
-            const TextureHandle& texture = "", uint32_t layer = 0, float depth = 0.0f) {
+            const TextureHandle& texture = "", uint32_t layer = 0, float depth = 0.0f) override {
             if (!sceneActive || !initialized) {
                 return;
             }

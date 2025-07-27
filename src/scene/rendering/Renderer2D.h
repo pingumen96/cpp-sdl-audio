@@ -188,6 +188,12 @@ namespace scene {
             const TextureHandle& texture = "") = 0;
 
         /**
+         * @brief Disegna un rettangolo con supporto per layer e rotazione
+         */
+        virtual void drawRect(const Rect2D& rect, const Color& color, float rotation,
+            const TextureHandle& texture = "", uint32_t layer = 0, float depth = 0.0f) = 0;
+
+        /**
          * @brief Termina la scena e invia i comandi al batch
          */
         virtual void endScene() = 0;
