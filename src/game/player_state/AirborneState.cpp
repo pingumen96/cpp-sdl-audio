@@ -6,6 +6,7 @@
 
 
 namespace game {
+    AirborneState::~AirborneState() = default;
     void AirborneState::moveLeft(Avatar& avatar) {
         std::cout << "[AirborneState] Moving left\n";
         avatar.applyHorizontalVelocity(-1.0f);

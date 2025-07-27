@@ -10,6 +10,7 @@ namespace game {
         void moveLeft(Avatar& avatar) override;
         void moveRight(Avatar& avatar) override;
         void jump(Avatar& avatar) override;
+        ~DuckingState() override;
         void standUp(Avatar& avatar) override;
         void attack(Avatar& avatar) override;
     };

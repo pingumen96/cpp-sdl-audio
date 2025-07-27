@@ -6,6 +6,7 @@
 namespace game {
     class StandingState : public PlayerState {
     public:
+        ~StandingState() override;
         const char* name() const override { return "Standing"; }
 
         void moveLeft(Avatar& avatar) override;

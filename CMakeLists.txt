@@ -80,6 +80,9 @@ src/scene/Scene.cpp
 src/scene/SceneManager.cpp
 # Renderer2D System (needed for Color::White and other constants)
 src/scene/rendering/Renderer2D.cpp
+src/game/player_state/StandingState.cpp
+src/game/player_state/DuckingState.cpp
+src/game/player_state/AirborneState.cpp
 )
 
 target_include_directories(sdl_app

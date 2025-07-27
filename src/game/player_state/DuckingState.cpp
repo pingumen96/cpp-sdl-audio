@@ -4,6 +4,7 @@
 #include "StandingState.h"
 
 namespace game {
+    DuckingState::~DuckingState() = default;
     void DuckingState::moveLeft(Avatar& avatar) {
         std::cout << "[DuckingState] Moving left\n";
         avatar.applyHorizontalVelocity(-1.0f);
