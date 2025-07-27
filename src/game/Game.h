@@ -3,7 +3,6 @@
 #include <memory>
 #include <iostream>
 #include <SDL2/SDL.h>
-#include "input/SceneInputSystem.h"
 #include "Avatar.h"
 #include "../core/Renderer.h"
 #include "../scene/SceneSystem.h"
@@ -31,11 +30,6 @@ namespace game {
         void init();
         void mainLoop();
 
-        // Unified input system
-        input::SceneInputSystem& getInputSystem() {
-            return *inputSystem;
-        }
-
         Avatar& getAvatar() {
             return avatar;
         }
@@ -46,12 +40,10 @@ namespace game {
         scene::SceneManager* getSceneManager() const { return sceneManager.get(); }
 
     private:
-        // Unified input system (replaces old InputHandler)
-        std::unique_ptr<input::SceneInputSystem> inputSystem;
         Avatar avatar; // The game avatar
         core::Renderer renderer; // SDL2/OpenGL Renderer
 
-        // Scene system (PRIMARY - no more dual state/scene management)
+        // Scene system (PRIMARY - unified scene management)
         std::unique_ptr<scene::SceneManager> sceneManager;
 
         void initializeSceneSystem();

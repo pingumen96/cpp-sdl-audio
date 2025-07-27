@@ -10,6 +10,11 @@
 #include <typeindex>
 #include <cassert>
 
+// Forward declaration to avoid circular dependency
+namespace scene {
+    class ComponentTypeRegistry;
+}
+
 namespace ecs {
 
     /**
@@ -55,6 +60,11 @@ namespace ecs {
         ComponentManager() : mNextComponentType(0) {}
 
         /**
+         * @brief Helper function to get global component type (implemented in .cpp)
+         */
+        static ComponentType getGlobalComponentType(std::type_index typeIndex);
+
+        /**
          * @brief Registers a new component type
          * @tparam T Component type to register
          */
@@ -67,14 +77,20 @@ namespace ecs {
                 return;
             }
 
-            // Add this component type to the component type map
-            mComponentTypes[typeIndex] = mNextComponentType;
+            // Get the global component type ID from registry
+            // This ensures consistency across all coordinators
+            ecs::ComponentType globalTypeId = getGlobalComponentType(typeIndex);
+
+            // Add this component type to the component type map using global ID
+            mComponentTypes[typeIndex] = globalTypeId;
 
             // Create a ComponentArray pointer and add it to the component arrays array
-            mComponentArrays[mNextComponentType] = std::make_shared<ComponentArray<T>>();
+            mComponentArrays[globalTypeId] = std::make_shared<ComponentArray<T>>();
 
-            // Increment the value so that the next component registered will be different
-            ++mNextComponentType;
+            // Update next component type to ensure we don't conflict
+            if (globalTypeId >= mNextComponentType) {
+                mNextComponentType = globalTypeId + 1;
+            }
         }
 
         /**

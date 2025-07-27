@@ -54,6 +54,25 @@ namespace scene {
         }
 
         /**
+         * @brief Get or register a component type using type_index (for ComponentManager)
+         * @param typeIndex The type_index of the component type
+         * @return Consistent type ID across all coordinators
+         */
+        static ecs::ComponentType getOrRegisterTypeByIndex(std::type_index typeIndex) {
+            std::lock_guard<std::mutex> lock(registryMutex);
+
+            auto it = globalTypes.find(typeIndex);
+            if (it != globalTypes.end()) {
+                return it->second;
+            }
+
+            // Register new type with next available ID
+            ecs::ComponentType newTypeId = nextTypeId++;
+            globalTypes[typeIndex] = newTypeId;
+            return newTypeId;
+        }
+
+        /**
          * @brief Initialize all common component types used by scenes
          * This should be called once at startup
          */

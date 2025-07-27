@@ -41,11 +41,10 @@ namespace scene {
                 return;
             }
 
-            // Get render queue builder from scene manager (we'll need to expose this)
-            // For now, create a temporary one - this will need proper integration
-            static RenderQueueBuilder tempBuilder; // TODO: Get from SceneManager
+            // Get render queue builder from scene manager
+            RenderQueueBuilder& renderBuilder = manager.getRenderQueueBuilder();
 
-            renderer2D = createRenderer2D(*resourceManager, tempBuilder);
+            renderer2D = createRenderer2D(*resourceManager, renderBuilder);
 
             // Configure Renderer2D
             RendererConfig2D config;

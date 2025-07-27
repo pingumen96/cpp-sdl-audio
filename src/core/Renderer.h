@@ -20,6 +20,7 @@ namespace core {
     class Renderer {
     private:
         std::unique_ptr<OpenGLBackend> backend;
+        Window* window; // Reference to the window for access
 
     public:
         Renderer(Window& window);
@@ -42,6 +43,9 @@ namespace core {
         // Access to the backend for scene system integration
         OpenGLBackend* getBackend() const { return backend.get(); }
         scene::IRenderBackend* getRenderBackend() const { return backend.get(); }
+
+        // Access to the window
+        Window& getWindow() const { return *window; }
 
         // Prevent copy
         Renderer(const Renderer&) = delete;

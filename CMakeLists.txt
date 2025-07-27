@@ -57,11 +57,8 @@ src/main.cpp
 src/AudioSample.cpp
 src/game/Game.h
 src/game/input/SceneInputSystem.cpp
-src/game/input/JumpCommand.cpp
-src/game/input/MoveLeftCommand.cpp
-src/game/input/MoveRightCommand.cpp
-src/game/input/PauseCommand.cpp
 src/game/Game.cpp
+src/ecs/ComponentManager.cpp
 src/core/GLContext.cpp
 src/core/Renderer.cpp
 src/core/OpenGLBackend.cpp
@@ -134,6 +131,8 @@ endif()
 # ECS Demo executable
 add_executable(ecs_demo
     src/ecs_demo.cpp
+    src/ecs/ComponentManager.cpp
+    src/scene/ComponentTypeRegistry.cpp
 )
 
 target_include_directories(ecs_demo

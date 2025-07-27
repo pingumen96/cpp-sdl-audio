@@ -170,6 +170,11 @@ namespace scene {
         IRenderBackend* getRenderBackend() const { return renderBackend.get(); }
 
         /**
+         * @brief Get render queue builder for scene integration
+         */
+        RenderQueueBuilder& getRenderQueueBuilder() { return renderBuilder; }
+
+        /**
          * @brief Get current render size
          */
         std::pair<uint32_t, uint32_t> getRenderSize() const { return { renderWidth, renderHeight }; }

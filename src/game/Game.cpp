@@ -12,7 +12,6 @@
 
 game::Game::Game(core::Window& window)
     : renderer(window),
-    inputSystem(nullptr),
     avatar() {
     // Initialize the scene system
     initializeSceneSystem();
@@ -31,11 +30,7 @@ void game::Game::init() {
         return;
     }
 
-    // Initialize unified input system
-    inputSystem = std::make_unique<input::SceneInputSystem>();
-    inputSystem->loadBindings("data/keybindings.json");
-
-    std::cout << "[Game] Unified input system initialized" << std::endl;
+    std::cout << "[Game] Initialized successfully" << std::endl;
 }
 
 void game::Game::mainLoop() {
@@ -100,51 +95,53 @@ void game::Game::initializeSceneSystem() {
     // Initialize component type registry
     scene::ComponentTypeRegistry::initializeCommonTypes();
 
-    // Get the OpenGL backend from the renderer
-    auto* openGLBackend = renderer.getBackend();
-    if (!openGLBackend) {
-        std::cerr << "[Game] Failed to get OpenGL backend from renderer!" << std::endl;
-        // Fall back to null backend
-        sceneManager = scene::createDefaultSceneManager(800, 600);
-        return;
-    }
+    // Create a proper OpenGL backend that wraps the existing renderer
+    auto openGLBackend = std::make_unique<core::OpenGLBackend>(renderer.getWindow());
 
-    // Since we don't own the backend (it's owned by the renderer), we'll need to use
-    // a different approach. Let's create our own copy of the backend specifically for the scene system.
-    // For now, let's just use the null backend as a safe fallback.
-    sceneManager = scene::createDefaultSceneManager(800, 600);
+    // Create scene manager with the OpenGL backend
+    sceneManager = scene::createSceneManager(std::move(openGLBackend), 800, 600);
 
     if (!sceneManager) {
         std::cerr << "[Game] Failed to create scene manager!" << std::endl;
         return;
     }
 
-    std::cout << "[Game] Scene system initialized successfully (using NullBackend for now)" << std::endl;
+    std::cout << "[Game] Scene system initialized successfully with OpenGL backend" << std::endl;
 }
 
 void game::Game::handleInput(const SDL_Event& event) {
-    if (!sceneManager || !inputSystem) return;
+    if (!sceneManager) return;
 
     // Get current active scene
     auto* currentScene = sceneManager->getCurrentScene();
     if (!currentScene) return;
 
-    // Use unified input system
-    bool handled = inputSystem->handleInput(event, currentScene);
-
-    if (!handled && event.type == SDL_KEYDOWN) {
-        // Handle built-in scene transitions
+    // Handle input directly with scene-specific methods
+    if (event.type == SDL_KEYDOWN) {
         int keyCode = event.key.keysym.sym;
 
         if (currentScene->getName() == "MenuScene") {
-            if (keyCode == SDLK_RETURN || keyCode == SDLK_KP_ENTER) {
-                // Transition to game
+            // Cast to MenuScene and handle menu input
+            if (auto* menuScene = dynamic_cast<MenuScene*>(currentScene)) {
+                menuScene->handleMenuInput(keyCode);
+            }
+        } else if (currentScene->getName() == "GameScene") {
+            // Cast to GameScene and handle game input
+            if (auto* gameScene = dynamic_cast<GameScene*>(currentScene)) {
+                gameScene->handleGameInput(keyCode);
+            }
+        }
+
+        // Handle scene transitions
+        if (keyCode == SDLK_RETURN || keyCode == SDLK_KP_ENTER) {
+            if (currentScene->getName() == "MenuScene") {
+                // Transition from menu to game
                 auto gameScene = std::make_unique<GameScene>();
                 sceneManager->switchScene(std::move(gameScene));
             }
-        } else if (currentScene->getName() == "GameScene") {
-            if (keyCode == SDLK_ESCAPE) {
-                // Return to menu
+        } else if (keyCode == SDLK_ESCAPE) {
+            if (currentScene->getName() == "GameScene") {
+                // Return to menu from game
                 auto menuScene = std::make_unique<MenuScene>();
                 sceneManager->pushScene(std::move(menuScene));
             }

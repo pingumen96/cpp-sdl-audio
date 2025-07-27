@@ -3,7 +3,7 @@
 
 namespace core {
 
-    Renderer::Renderer(Window& window) {
+    Renderer::Renderer(Window& window) : window(&window) {
         // Create and initialize the OpenGL backend
         backend = std::make_unique<OpenGLBackend>(window);
 
