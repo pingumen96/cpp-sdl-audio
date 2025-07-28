@@ -7,8 +7,6 @@ namespace core {
     Renderer::Renderer(Window& window) : window(&window) {
         try {
             adapter = std::make_unique<compat::RendererAdapter>(window);
-            legacyBridge = std::make_unique<compat::IRenderBackendBridge>(adapter->getBackend());
-
             std::cout << "[Renderer] Initialized with new stratified architecture" << std::endl;
             std::cout << "[Renderer] " << adapter->get2DRenderer()->getRendererInfo() << std::endl;
         } catch (const std::exception& e) {
@@ -80,8 +78,10 @@ namespace core {
     }
 
     scene::IRenderBackend* Renderer::getRenderBackend() const {
-        // Return the legacy bridge for scene system compatibility
-        return legacyBridge.get();
+        // For legacy compatibility, we need to create a bridge
+        // For now, return nullptr and log a deprecation warning
+        std::cerr << "[Renderer] WARNING: getRenderBackend() is deprecated. Use getBackend() instead." << std::endl;
+        return nullptr;
     }
 
     void Renderer::drawRect(const rendering::twod::Rect2D& rect, const rendering::twod::Color& color) {

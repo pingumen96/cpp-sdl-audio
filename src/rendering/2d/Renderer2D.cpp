@@ -230,14 +230,14 @@ namespace rendering::twod {
         }
     }
 
-void Renderer2D::updateViewMatrix() {
-    // Create view matrix (inverse of camera transform)
-    viewMatrix = math::Mat4::translation(-cameraX, -cameraY, 0.0f);
-    
-    if (backend) {
-        commandBuffer.setViewMatrix(viewMatrix);
-    }
-}    void Renderer2D::flushBatch() {
+    void Renderer2D::updateViewMatrix() {
+        // Create view matrix (inverse of camera transform)
+        viewMatrix = math::Mat4::translation(-cameraX, -cameraY, 0.0f);
+
+        if (backend) {
+            commandBuffer.setViewMatrix(viewMatrix);
+        }
+    }    void Renderer2D::flushBatch() {
         if (currentBatch.empty()) {
             return;
         }
@@ -261,10 +261,10 @@ void Renderer2D::updateViewMatrix() {
         currentBatch.clear();
     }
 
-math::Mat4 Renderer2D::createTransformMatrix(const Rect2D& rect) const {
-    return math::Mat4::translation(rect.position.x(), rect.position.y(), 0.0f) *
-           math::Mat4::scale(rect.size.x(), rect.size.y(), 1.0f);
-}    void Renderer2D::sortBatchByDepth() {
+    math::Mat4 Renderer2D::createTransformMatrix(const Rect2D& rect) const {
+        return math::Mat4::translation(rect.position.x(), rect.position.y(), 0.0f) *
+            math::Mat4::scale(rect.size.x(), rect.size.y(), 1.0f);
+    }    void Renderer2D::sortBatchByDepth() {
         std::sort(currentBatch.begin(), currentBatch.end(),
             [](const DrawItem2D& a, const DrawItem2D& b) {
                 return a.depth < b.depth; // Back to front

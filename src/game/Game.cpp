@@ -104,18 +104,25 @@ void game::Game::initializeSceneSystem() {
     // Initialize component type registry
     scene::ComponentTypeRegistry::initializeCommonTypes();
 
-    // Create a proper OpenGL backend that wraps the existing renderer
-    auto openGLBackend = std::make_unique<core::OpenGLBackend>(renderer.getWindow());
+    // Get the render backend from the new architecture and create a dedicated bridge for the scene system
+    auto* newBackend = renderer.getBackend();
+    if (!newBackend) {
+        std::cerr << "[Game] Failed to get render backend from renderer!" << std::endl;
+        return;
+    }
 
-    // Create scene manager with the OpenGL backend
-    sceneManager = scene::createSceneManager(std::move(openGLBackend), 800, 600);
+    // Create a dedicated IRenderBackend bridge for the scene system
+    auto sceneBackend = std::make_unique<compat::IRenderBackendBridge>(newBackend);
+
+    // Create scene manager with the backend bridge
+    sceneManager = scene::createSceneManager(std::move(sceneBackend), 800, 600);
 
     if (!sceneManager) {
         std::cerr << "[Game] Failed to create scene manager!" << std::endl;
         return;
     }
 
-    std::cout << "[Game] Scene system initialized successfully with OpenGL backend" << std::endl;
+    std::cout << "[Game] Scene system initialized successfully with new architecture backend" << std::endl;
 }
 
 void game::Game::handleInput(const SDL_Event& event) {
