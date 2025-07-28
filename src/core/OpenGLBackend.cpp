@@ -330,32 +330,38 @@ namespace core {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMatrix.data());
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, projectionMatrix.data());
 
-        // Use different colors based on layer and position
+        // Use different colors based on layer
         float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
 
-        if (item.renderLayer == 1) {
-            // Center line - white
-            r = 1.0f; g = 1.0f; b = 1.0f;
-            std::cout << "  -> Center line (white)" << std::endl;
-        } else if (item.renderLayer == 2) {
-            // Paddles - distinguish by position
-            if (posX < 0.0f) {
-                // Left paddle - red
-                r = 1.0f; g = 0.2f; b = 0.2f;
-                std::cout << "  -> Left paddle (red)" << std::endl;
-            } else {
-                // Right paddle - blue
-                r = 0.2f; g = 0.4f; b = 1.0f;
-                std::cout << "  -> Right paddle (blue)" << std::endl;
-            }
-        } else if (item.renderLayer == 3) {
-            // Ball - yellow/green
-            r = 0.2f; g = 1.0f; b = 0.2f;
-            std::cout << "  -> Ball (green)" << std::endl;
-        } else {
-            // Fallback - cyan
-            r = 0.0f; g = 1.0f; b = 1.0f;
-            std::cout << "  -> Unknown layer " << item.renderLayer << " (cyan)" << std::endl;
+        switch (item.renderLayer) {
+        case 0:
+            r = 0.8f; g = 0.8f; b = 0.8f; // Light gray
+            std::cout << "  -> Layer 0 (light gray)" << std::endl;
+            break;
+        case 1:
+            r = 1.0f; g = 1.0f; b = 1.0f; // White
+            std::cout << "  -> Layer 1 (white)" << std::endl;
+            break;
+        case 2:
+            r = 0.2f; g = 0.4f; b = 1.0f; // Blue
+            std::cout << "  -> Layer 2 (blue)" << std::endl;
+            break;
+        case 3:
+            r = 0.2f; g = 1.0f; b = 0.2f; // Green
+            std::cout << "  -> Layer 3 (green)" << std::endl;
+            break;
+        case 4:
+            r = 1.0f; g = 0.2f; b = 0.2f; // Red
+            std::cout << "  -> Layer 4 (red)" << std::endl;
+            break;
+        case 5:
+            r = 1.0f; g = 1.0f; b = 0.2f; // Yellow
+            std::cout << "  -> Layer 5 (yellow)" << std::endl;
+            break;
+        default:
+            r = 0.0f; g = 1.0f; b = 1.0f; // Cyan fallback
+            std::cout << "  -> Layer " << item.renderLayer << " (cyan)" << std::endl;
+            break;
         }
 
         glUniform4f(colorLoc, r, g, b, a);
@@ -408,21 +414,23 @@ namespace core {
     }
 
     bool OpenGLBackend::isQuadInViewport(float posX, float posY, float scaleX, float scaleY) const {
-        // Calculate the bounds of the viewport
-        // Our projection is orthographic from -400 to +400 (width) and -300 to +300 (height)
-        float viewportLeft = -400.0f;
-        float viewportRight = 400.0f;
-        float viewportBottom = -300.0f;
-        float viewportTop = 300.0f;
+        // Calculate the bounds of the viewport (orthographic projection)
+        float halfWidth = static_cast<float>(width) * 0.5f;
+        float halfHeight = static_cast<float>(height) * 0.5f;
+
+        float viewportLeft = -halfWidth;
+        float viewportRight = halfWidth;
+        float viewportBottom = -halfHeight;
+        float viewportTop = halfHeight;
 
         // Calculate the bounds of the quad (unit quad scaled and positioned)
-        float halfWidth = scaleX * 0.5f;
-        float halfHeight = scaleY * 0.5f;
+        float quadHalfWidth = scaleX * 0.5f;
+        float quadHalfHeight = scaleY * 0.5f;
 
-        float quadLeft = posX - halfWidth;
-        float quadRight = posX + halfWidth;
-        float quadBottom = posY - halfHeight;
-        float quadTop = posY + halfHeight;
+        float quadLeft = posX - quadHalfWidth;
+        float quadRight = posX + quadHalfWidth;
+        float quadBottom = posY - quadHalfHeight;
+        float quadTop = posY + quadHalfHeight;
 
         // Check if quad overlaps with viewport
         bool overlapsX = (quadRight >= viewportLeft && quadLeft <= viewportRight);

@@ -78,7 +78,7 @@ namespace scene {
         math::Vec2f position{ 0.0f };
         float zoom = 1.0f;
         float rotation = 0.0f;
-        math::Vec2f viewportSize{ 1920.0f, 1080.0f };
+        math::Vec2f viewportSize{ 800.0f, 600.0f }; // Default viewport size
 
         mutable math::Matrix4f viewMatrix{ 1.0f };
         mutable math::Matrix4f projectionMatrix{ 1.0f };

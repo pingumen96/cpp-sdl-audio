@@ -135,14 +135,9 @@ void game::Game::handleInput(const SDL_Event& event) {
                     menuScene->handleMenuInput(keyCode);
                 }
             }
-        } else if (currentScene->getName() == "GameScene") {
-            // Cast to GameScene and handle game input
-            if (auto* gameScene = dynamic_cast<GameScene*>(currentScene)) {
-                if (event.type == SDL_KEYDOWN) {
-                    gameScene->handleGameInput(keyCode);
-                }
-            }
         }
+        // GameScene no longer handles input directly - all input is processed
+        // through ECS systems (InputCollectSystem -> InputMappingSystem -> Game Systems)
 
         // Handle scene transitions (only on keydown)
         if (event.type == SDL_KEYDOWN) {

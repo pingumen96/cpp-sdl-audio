@@ -6,16 +6,19 @@
 namespace game {
 
     /**
-     * @brief Main game scene using unified ECS+Renderer2D architecture
+     * @brief Main game scene using pure ECS architecture
      *
-     * This is a clean template for implementing a new game.
-     * Game entities are managed through ECS with Renderable2D components.
+     * This scene serves as a factory for entities and resources, then delegates
+     * all game logic to dedicated ECS systems. It follows the principle:
+     * - Scene = Entity/Resource factory + System registration
+     * - Systems = All game logic and frame-by-frame updates
+     * - Components = Pure data containers
      */
     class GameScene : public scene::Scene2D {
     private:
-        // Game entities - add your game-specific entities here
+        // Optional: Keep references to key entities for specific operations (respawn, etc.)
+        // If not needed, these can be removed entirely
         ecs::Entity backgroundEntity = 0;
-        std::vector<ecs::Entity> gameEntities;
 
     public:
         GameScene() {
@@ -31,10 +34,20 @@ namespace game {
 
             // Set up game resources - add your textures and sounds here
             auto& resourceBundle = getResourceBundle();
-            // resourceBundle.addResource("textures/your_texture.png");
-            // resourceBundle.addResource("sounds/your_sound.wav");
+            // resourceBundle.addResource("textures/player.png");
+            // resourceBundle.addResource("textures/enemy.png");
+            // resourceBundle.addResource("sounds/jump.wav");
+            // resourceBundle.addResource("sounds/collect.wav");
 
-            // Create game entities
+            // --- Register systems specific to this scene ---
+            // These systems handle all game logic and frame-by-frame updates
+            // manager.addSystem<PlayerMovementSystem>();
+            // manager.addSystem<EnemyAISystem>();
+            // manager.addSystem<CollisionSystem>();
+            // manager.addSystem<GameRuleSystem>();
+            // manager.addSystem<ParticleSystem>();
+
+            // Create initial game entities (pure factory pattern)
             createGameEntities();
         }
 
@@ -48,37 +61,40 @@ namespace game {
 
         void onDetach(scene::SceneManager& manager) override {
             std::cout << "[GameScene] Game scene detached" << std::endl;
+
+            // --- Unregister scene-specific systems ---
+            // Clean up systems registered in onAttach
+            // manager.removeSystem<PlayerMovementSystem>();
+            // manager.removeSystem<EnemyAISystem>();
+            // manager.removeSystem<CollisionSystem>();
+            // manager.removeSystem<GameRuleSystem>();
+            // manager.removeSystem<ParticleSystem>();
+
             scene::Scene2D::onDetach(manager);
         }
 
         void update(float deltaTime) override {
-            // Update base scene systems
+            // Pure ECS approach: scene only updates base systems
+            // All game logic is handled by registered systems
             scene::Scene2D::update(deltaTime);
 
-            // Update game-specific logic
-            updateGameLogic(deltaTime);
-        }
-
-        /**
-         * @brief Handle game input
-         */
-        void handleGameInput(int keyCode) {
-            // Implement your game input handling here
-            // Example:
-            // switch (keyCode) {
-            //     case SDLK_SPACE:
-            //         // Handle spacebar
-            //         break;
-            //     // Add more keys as needed
-            // }
+            // No game logic here! Systems handle everything:
+            // - InputMappingSystem converts input to intents
+            // - PlayerMovementSystem handles movement
+            // - CollisionSystem handles collisions
+            // - GameRuleSystem handles scoring/win conditions
+            // - etc.
         }
 
     private:
         /**
-         * @brief Create game entities using ECS
+         * @brief Create initial game entities (pure factory pattern)
+         *
+         * This method only creates entities and assigns initial components.
+         * All behavior and logic is handled by systems, not by the scene.
          */
         void createGameEntities() {
-            // Create background
+            // Create background entity
             backgroundEntity = createColoredQuad(
                 math::Vec2f(0.0f, 0.0f),
                 math::Vec2f(800.0f, 600.0f),
@@ -86,36 +102,55 @@ namespace game {
                 0 // Background layer
             );
 
-            // Add your game entities here
-            // Example:
-            // ecs::Entity playerEntity = createSprite(
-            //     math::Vec2f(400.0f, 300.0f), // Position
-            //     math::Vec2f(50.0f, 50.0f),   // Size
-            //     "player",                     // Texture ID
-            //     scene::Color::White,          // Tint
-            //     5                            // Layer
-            // );
-        }
-
-        /**
-         * @brief Game-specific update logic
-         */
-        void updateGameLogic(float deltaTime) {
-            // Implement your game logic here
-            // Example: move entities, check collisions, update AI, etc.
-            
+            // Example: Create player entity
             // auto* coordinator = getCoordinator();
-            // if (!coordinator) return;
-            
-            // Update game entities as needed
+            // if (coordinator) {
+            //     ecs::Entity playerEntity = createSprite(
+            //         math::Vec2f(100.0f, 300.0f),    // Starting position
+            //         math::Vec2f(32.0f, 32.0f),      // Size
+            //         "player",                        // Texture ID
+            //         scene::Color::White,             // Tint
+            //         5                               // Layer
+            //     );
+            //
+            //     // Add gameplay components
+            //     coordinator->addComponent(playerEntity, ecs::components::PlayerTag{});
+            //     coordinator->addComponent(playerEntity, ecs::components::Health{100, 100});
+            //     coordinator->addComponent(playerEntity, ecs::components::Velocity{});
+            //
+            //     // Movement-related components
+            //     PlayerMovementComponent movement{};
+            //     movement.speed = 200.0f;
+            //     movement.jumpForce = 400.0f;
+            //     coordinator->addComponent(playerEntity, movement);
+            // }
+
+            // Example: Create enemies, collectibles, etc.
+            // for (int i = 0; i < 3; ++i) {
+            //     ecs::Entity enemy = createSprite(...);
+            //     coordinator->addComponent(enemy, ecs::components::EnemyTag{});
+            //     coordinator->addComponent(enemy, EnemyAIComponent{});
+            // }
         }
 
         /**
-         * @brief Custom 2D rendering for game-specific effects
+         * @brief Custom 2D rendering for scene-specific effects
+         *
+         * Use this for effects that don't belong to any entity:
+         * - Screen-wide shaders
+         * - UI overlays that aren't entities
+         * - Debug visualization
          */
         void render2DCustom() override {
-            // Add any custom rendering here (optional)
-            // This is called after all entities are rendered
+            // Example: Render debug information
+            // auto* renderer = getRenderer2D();
+            // if (renderer) {
+            //     // Draw UI that isn't entity-based
+            //     scene::Rect2D debugRect;
+            //     debugRect.position = math::Vec2f(10.0f, 10.0f);
+            //     debugRect.size = math::Vec2f(200.0f, 50.0f);
+            //     renderer->drawRect(debugRect, scene::Color(0.0f, 0.0f, 0.0f, 0.5f));
+            // }
         }
     };
 
