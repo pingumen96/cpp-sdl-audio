@@ -9,7 +9,6 @@
 // Include unified scene-based system
 #include "MenuScene.h"
 #include "GameScene.h"
-#include "PongScene.h"
 
 game::Game::Game(core::Window& window)
     : renderer(window),
@@ -22,10 +21,10 @@ game::Game::~Game() = default;
 void game::Game::init() {
     // Initialize unified scene system
     if (sceneManager) {
-        // Push Pong scene directly for testing
-        auto pongScene = std::make_unique<PongScene>();
-        sceneManager->pushScene(std::move(pongScene));
-        std::cout << "[Game] Started with PongScene directly" << std::endl;
+        // Start with main menu
+        auto menuScene = std::make_unique<MenuScene>();
+        sceneManager->pushScene(std::move(menuScene));
+        std::cout << "[Game] Started with MenuScene" << std::endl;
     } else {
         std::cerr << "[Game] Scene manager not available!" << std::endl;
         return;
@@ -143,30 +142,19 @@ void game::Game::handleInput(const SDL_Event& event) {
                     gameScene->handleGameInput(keyCode);
                 }
             }
-        } else if (currentScene->getName() == "PongScene") {
-            // Cast to PongScene and handle pong input
-            if (auto* pongScene = dynamic_cast<PongScene*>(currentScene)) {
-                pongScene->handlePongInput(event);
-            }
         }
 
         // Handle scene transitions (only on keydown)
         if (event.type == SDL_KEYDOWN) {
             if (keyCode == SDLK_RETURN || keyCode == SDLK_KP_ENTER) {
                 if (currentScene->getName() == "MenuScene") {
-                    // Transition from menu to pong game
-                    auto pongScene = std::make_unique<PongScene>();
-                    sceneManager->switchScene(std::move(pongScene));
-                }
-            } else if (keyCode == SDLK_TAB) {
-                if (currentScene->getName() == "MenuScene") {
-                    // Alternative: switch to regular game scene
+                    // Transition from menu to game
                     auto gameScene = std::make_unique<GameScene>();
                     sceneManager->switchScene(std::move(gameScene));
                 }
             } else if (keyCode == SDLK_ESCAPE) {
-                if (currentScene->getName() == "GameScene" || currentScene->getName() == "PongScene") {
-                    // Return to menu from any game
+                if (currentScene->getName() == "GameScene") {
+                    // Return to menu from game
                     auto menuScene = std::make_unique<MenuScene>();
                     sceneManager->pushScene(std::move(menuScene));
                 }

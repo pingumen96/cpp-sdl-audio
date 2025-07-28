@@ -12,7 +12,6 @@
 namespace game {
     class MenuScene;
     class GameScene;
-    class PongScene;
 }
 
 namespace core {
@@ -23,7 +22,6 @@ namespace game {
     // Forward declarations for new scene system
     class MenuScene;
     class GameScene;
-    class PongScene;
 
     class Game {
     public:

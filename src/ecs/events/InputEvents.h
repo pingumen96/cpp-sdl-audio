@@ -60,7 +60,6 @@ namespace ecs::events {
         enum class Type {
             TO_MENU,
             TO_GAME,
-            TO_PONG,
             BACK,
             QUIT
         };

@@ -24,7 +24,7 @@ int main() {
         game.init();
 
         // Skip the demo and go directly to main game loop
-        std::cout << "\n=== Starting Pong Game ===" << std::endl;
+        std::cout << "\n=== Starting Game ===" << std::endl;
 
         // Run the normal game loop
         game.mainLoop();

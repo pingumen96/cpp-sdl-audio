@@ -58,7 +58,6 @@ src/AudioSample.cpp
 src/game/Game.h
 src/game/input/SceneInputSystem.cpp
 src/game/Game.cpp
-src/game/PongScene.cpp
 src/ecs/ComponentManager.cpp
 src/core/GLContext.cpp
 src/core/Renderer.cpp
