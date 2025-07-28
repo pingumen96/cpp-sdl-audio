@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../scene/Scene2D.h"
+#include "InputEnabledScene.h"
 #include "../math/math.h"
 #include <SDL2/SDL.h>
 
@@ -14,8 +14,10 @@ namespace game {
      * - Player 2 (right): Up/Down arrows
      * - Ball bounces between paddles and top/bottom walls
      * - Score tracking for both players
+     *
+     * Now uses ECS-based input system (Phase 1: reads InputState in old methods)
      */
-    class PongScene : public scene::Scene2D {
+    class PongScene : public InputEnabledScene {
     private:
         // Game entities
         ecs::Entity leftPaddleEntity = 0;
@@ -53,8 +55,7 @@ namespace game {
         bool rightPaddleDown = false;
 
     public:
-        PongScene() {
-            setName("PongScene");
+        PongScene() : InputEnabledScene("PongScene") {
             setPausesUnderlying(true);
         }
 

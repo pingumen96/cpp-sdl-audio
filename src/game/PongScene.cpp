@@ -11,8 +11,8 @@ namespace game {
     void PongScene::onAttach(scene::SceneManager& manager) {
         std::cout << "[PongScene] Pong scene attached" << std::endl;
 
-        // Initialize 2D rendering system
-        initialize2D(manager);
+        // Initialize input-enabled scene (this sets up input systems)
+        InputEnabledScene::onAttach(manager);
 
         // Create game entities
         createGameEntities();
@@ -35,8 +35,12 @@ namespace game {
     void PongScene::update(float deltaTime) {
         if (!gameRunning) return;
 
-        // Update base scene systems
-        scene::Scene2D::update(deltaTime);
+        // PHASE 1: Handle input using InputState every frame
+        SDL_Event dummyEvent; // Not used anymore, but keeping signature for now
+        handlePongInput(dummyEvent);
+
+        // Update base scene systems (including input systems)
+        InputEnabledScene::update(deltaTime);
 
         // Update game-specific logic
         updatePaddles(deltaTime);
@@ -47,50 +51,47 @@ namespace game {
     }
 
     void PongScene::handlePongInput(const SDL_Event& event) {
-        if (event.type == SDL_KEYDOWN) {
-            switch (event.key.keysym.sym) {
-                // Player 1 (left paddle) - W/S
-            case SDLK_w:
-                leftPaddleUp = true;
-                break;
-            case SDLK_s:
-                leftPaddleDown = true;
-                break;
-                // Player 2 (right paddle) - Up/Down arrows
-            case SDLK_UP:
-                rightPaddleUp = true;
-                break;
-            case SDLK_DOWN:
-                rightPaddleDown = true;
-                break;
-                // Reset game
-            case SDLK_r:
-                leftScore = 0;
-                rightScore = 0;
-                resetBall();
-                gameRunning = true;
-                break;
-                // Exit to menu
-            case SDLK_ESCAPE:
-                // This should be handled by the game state manager
-                gameRunning = false;
-                break;
-            }
-        } else if (event.type == SDL_KEYUP) {
-            switch (event.key.keysym.sym) {
-            case SDLK_w:
-                leftPaddleUp = false;
-                break;
-            case SDLK_s:
-                leftPaddleDown = false;
-                break;
-            case SDLK_UP:
-                rightPaddleUp = false;
-                break;
-            case SDLK_DOWN:
-                rightPaddleDown = false;
-                break;
-            }
+        // PHASE 1: Transitioning to InputState
+        // This method now reads from InputState instead of processing SDL_Event directly
+
+        auto* inputState = getInputState();
+        if (!inputState) {
+            std::cerr << "[PongScene] InputState not available!" << std::endl;
+            return;
+        }
+
+        // Read current input state for continuous input (movement)
+        bool prevLeftUp = leftPaddleUp;
+        bool prevLeftDown = leftPaddleDown;
+        bool prevRightUp = rightPaddleUp;
+        bool prevRightDown = rightPaddleDown;
+
+        leftPaddleUp = inputState->isKeyPressed(SDL_SCANCODE_W);
+        leftPaddleDown = inputState->isKeyPressed(SDL_SCANCODE_S);
+        rightPaddleUp = inputState->isKeyPressed(SDL_SCANCODE_UP);
+        rightPaddleDown = inputState->isKeyPressed(SDL_SCANCODE_DOWN);
+
+        // Log input changes for debugging
+        if (leftPaddleUp != prevLeftUp || leftPaddleDown != prevLeftDown ||
+            rightPaddleUp != prevRightUp || rightPaddleDown != prevRightDown) {
+            std::cout << "[PongScene] Input state changed - L:" << (leftPaddleUp ? "U" : "") << (leftPaddleDown ? "D" : "")
+                << " R:" << (rightPaddleUp ? "U" : "") << (rightPaddleDown ? "D" : "") << std::endl;
+        }
+
+        // Handle discrete input (pressed this frame)
+        if (inputState->wasKeyPressed(SDL_SCANCODE_R)) {
+            // Reset game
+            leftScore = 0;
+            rightScore = 0;
+            resetBall();
+            gameRunning = true;
+            std::cout << "[PongScene] Game reset" << std::endl;
+        }
+
+        if (inputState->wasKeyPressed(SDL_SCANCODE_ESCAPE)) {
+            // Exit to menu
+            gameRunning = false;
+            std::cout << "[PongScene] Exit requested" << std::endl;
         }
     }
 

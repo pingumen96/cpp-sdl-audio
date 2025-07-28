@@ -6,6 +6,7 @@
 #include "Avatar.h"
 #include "../core/Renderer.h"
 #include "../scene/SceneSystem.h"
+#include "../ecs/ECS.h"
 
 // Forward declarations for scenes (no longer need old states)
 namespace game {

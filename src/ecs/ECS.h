@@ -28,6 +28,19 @@
 // Main coordinator
 #include "Coordinator.h"
 
+// Input and Event System
+#include "InputState.h"
+#include "EventBus.h"
+#include "GlobalFlags.h"
+#include "GlobalResourceHolder.h"
+
+// Events
+#include "events/InputEvents.h"
+
+// Systems
+#include "systems/InputCollectSystem.h"
+#include "systems/InputMappingSystem.h"
+
 namespace ecs {
 
     /**

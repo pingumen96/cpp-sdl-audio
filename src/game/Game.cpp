@@ -57,12 +57,20 @@ void game::Game::mainLoop() {
         accumulator += frameTime;
 
         // --- INPUT HANDLING ---
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = false;
-            } else {
-                handleInput(event);
+        // Input is now handled entirely by each scene's InputCollectSystem
+        // SDL_QUIT is handled by InputCollectSystem setting GlobalFlags.quit
+
+        // Check if any scene has requested quit
+        if (sceneManager) {
+            auto* currentScene = sceneManager->getCurrentScene();
+            if (currentScene && currentScene->getCoordinator()) {
+                auto* coord = currentScene->getCoordinator();
+                if (coord->hasGlobalResource<ecs::GlobalFlags>()) {
+                    auto& globalFlags = coord->getGlobalResource<ecs::GlobalFlags>();
+                    if (globalFlags.quit) {
+                        running = false;
+                    }
+                }
             }
         }
 

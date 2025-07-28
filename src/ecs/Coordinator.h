@@ -3,6 +3,7 @@
 #include "EntityManager.h"
 #include "ComponentManager.h"
 #include "SystemManager.h"
+#include "GlobalResourceHolder.h"
 #include "ECSTypes.h"
 #include <memory>
 
@@ -27,6 +28,7 @@ namespace ecs {
         std::unique_ptr<EntityManager> mEntityManager;
         std::unique_ptr<ComponentManager> mComponentManager;
         std::unique_ptr<SystemManager> mSystemManager;
+        std::unique_ptr<GlobalResourceHolder> mGlobalResourceHolder;
 
     public:
         /**
@@ -36,6 +38,7 @@ namespace ecs {
             mEntityManager = std::make_unique<EntityManager>();
             mComponentManager = std::make_unique<ComponentManager>();
             mSystemManager = std::make_unique<SystemManager>();
+            mGlobalResourceHolder = std::make_unique<GlobalResourceHolder>();
         }
 
         // Entity methods
@@ -248,6 +251,80 @@ namespace ecs {
          */
         size_t getRegisteredComponentCount() const {
             return mComponentManager->getRegisteredComponentCount();
+        }
+
+        // Global resource methods
+
+        /**
+         * @brief Add a global resource of type T
+         * @tparam T Resource type
+         * @tparam Args Constructor argument types
+         * @param args Arguments to construct the resource
+         * @return Reference to the created resource
+         */
+        template<typename T, typename... Args>
+        T& addGlobalResource(Args&&... args) {
+            return mGlobalResourceHolder->addResource<T>(std::forward<Args>(args)...);
+        }
+
+        /**
+         * @brief Get a global resource of type T
+         * @tparam T Resource type
+         * @return Reference to the resource
+         * @throws std::runtime_error if resource doesn't exist
+         */
+        template<typename T>
+        T& getGlobalResource() {
+            return mGlobalResourceHolder->getResource<T>();
+        }
+
+        /**
+         * @brief Get a global resource of type T (const version)
+         * @tparam T Resource type
+         * @return Const reference to the resource
+         * @throws std::runtime_error if resource doesn't exist
+         */
+        template<typename T>
+        const T& getGlobalResource() const {
+            return mGlobalResourceHolder->getResource<T>();
+        }
+
+        /**
+         * @brief Get a pointer to global resource of type T
+         * @tparam T Resource type
+         * @return Pointer to the resource or nullptr if not found
+         */
+        template<typename T>
+        T* getGlobalResourcePtr() {
+            return mGlobalResourceHolder->getResourcePtr<T>();
+        }
+
+        /**
+         * @brief Check if a global resource of type T exists
+         * @tparam T Resource type
+         * @return true if resource exists, false otherwise
+         */
+        template<typename T>
+        bool hasGlobalResource() const {
+            return mGlobalResourceHolder->hasResource<T>();
+        }
+
+        /**
+         * @brief Remove a global resource of type T
+         * @tparam T Resource type
+         * @return true if resource was removed, false if it didn't exist
+         */
+        template<typename T>
+        bool removeGlobalResource() {
+            return mGlobalResourceHolder->removeResource<T>();
+        }
+
+        /**
+         * @brief Get the number of registered global resources
+         * @return Global resource count
+         */
+        size_t getGlobalResourceCount() const {
+            return mGlobalResourceHolder->getResourceCount();
         }
     };
 
