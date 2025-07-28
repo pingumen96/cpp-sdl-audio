@@ -63,6 +63,15 @@ src/core/GLContext.cpp
 src/core/Renderer.cpp
 src/core/OpenGLBackend.cpp
 src/core/Window.cpp
+# New Stratified Rendering Architecture
+src/rendering/hal/RenderDevice.cpp
+src/rendering/hal/opengl/OpenGLDevice.cpp
+src/rendering/hal/null/NullDevice.cpp
+src/rendering/backend/RenderBackend.cpp
+src/rendering/2d/Renderer2D.cpp
+src/rendering/Rendering.cpp
+# Compatibility Layer
+src/compat/RendererAdapter.cpp
 # Resource Management System
 src/resources/IFileSystem.cpp
 src/resources/LoaderFactory.cpp
@@ -262,6 +271,7 @@ src/tests/scene/registry_debug.cpp
 src/tests/scene/scene_debug.cpp
 src/tests/scene/onattach_debug.cpp
 src/tests/scene/simple_scene_test.cpp
+src/tests/rendering/new_architecture_test.cpp
 # src/tests/scene/onattach_detail_debug.cpp  # Temporarily disabled due to resource loading
 src/tests/scene/scene_integration_test.cpp
 src/tests/resources/mock_resource_test.cpp
@@ -271,6 +281,18 @@ src/ecs/ComponentManager.cpp
 src/scene/ComponentTypeRegistry.cpp
 # Renderer2D System (for tests)
 src/scene/rendering/Renderer2D.cpp
+# New Stratified Rendering Architecture (for tests)
+src/rendering/hal/RenderDevice.cpp
+src/rendering/hal/opengl/OpenGLDevice.cpp
+src/rendering/hal/null/NullDevice.cpp
+src/rendering/backend/RenderBackend.cpp
+src/rendering/2d/Renderer2D.cpp
+src/rendering/Rendering.cpp
+# Compatibility Layer (for tests)
+src/compat/RendererAdapter.cpp
+# Core System (for tests - needed by OpenGL device)
+src/core/GLContext.cpp
+src/core/Window.cpp
 # Resource Management System (for tests)
 src/resources/IFileSystem.cpp
 src/resources/LoaderFactory.cpp
