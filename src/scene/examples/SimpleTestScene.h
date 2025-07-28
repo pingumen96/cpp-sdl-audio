@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Scene.h"
-#include "../systems/TransformSyncSystem.h"
+#include "../../ecs/systems/TransformSyncSystem.h"
 #include "../../ecs/components/CommonComponents.h"
 
 namespace scene {

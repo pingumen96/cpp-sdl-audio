@@ -56,8 +56,9 @@ void game::Game::mainLoop() {
         accumulator += frameTime;
 
         // --- INPUT HANDLING ---
-        // Input is now handled entirely by each scene's InputCollectSystem
-        // SDL_QUIT is handled by InputCollectSystem setting GlobalFlags.quit
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+        }
 
         // Check if any scene has requested quit
         if (sceneManager) {

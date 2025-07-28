@@ -1,4 +1,3 @@
-#define SDL_MAIN_HANDLED
 #include "ecs/ECSExample.h"
 #include <iostream>
 

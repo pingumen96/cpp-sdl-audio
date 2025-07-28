@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../ecs/System.h"
-#include "../../ecs/components/CommonComponents.h"
-#include "../SceneNode.h"
+#include "../System.h"
+#include "../components/CommonComponents.h"
+#include "../../scene/SceneNode.h"
 #include "../../math/math.h"
 #include <unordered_map>
 

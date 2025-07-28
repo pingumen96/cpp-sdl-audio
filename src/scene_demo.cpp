@@ -1,4 +1,3 @@
-#define SDL_MAIN_HANDLED
 #include "scene/SceneSystem.h"
 #include <iostream>
 #include <chrono>

@@ -27,7 +27,7 @@
 #include "rendering/RenderQueueBuilder.h"
 
 // Systems
-#include "systems/TransformSyncSystem.h"
+#include "../ecs/systems/TransformSyncSystem.h"
 
 // Transitions
 #include "SceneTransition.h"

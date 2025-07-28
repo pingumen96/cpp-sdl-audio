@@ -141,26 +141,7 @@ target_include_directories(ecs_demo
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Link SDL2 libraries for ECS demo (needed for InputState.h)
-if(WIN32)
-    target_link_libraries(ecs_demo PRIVATE
-        SDL2::SDL2
-        SDL2_image::SDL2_image-static
-        SDL2_mixer::SDL2_mixer-static
-        SDL2_ttf::SDL2_ttf-static
-    )
-    # For console applications, we don't want SDL2main wrapper
-    set_target_properties(ecs_demo PROPERTIES
-        LINK_FLAGS "-mconsole"
-    )
-else()
-    target_link_libraries(ecs_demo PRIVATE
-        SDL2::SDL2
-        SDL2_image::SDL2_image
-        SDL2_mixer::SDL2_mixer
-        SDL2_ttf::SDL2_ttf
-    )
-endif()
+# ECS is header-only, so no additional libraries needed for basic demo
 
 # Renderer2D Demo executable
 add_executable(renderer2d_demo

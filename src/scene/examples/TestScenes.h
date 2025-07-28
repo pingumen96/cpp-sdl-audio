@@ -2,7 +2,7 @@
 
 #include "../Scene.h"
 #include "../../ecs/components/CommonComponents.h"
-#include "../systems/TransformSyncSystem.h"
+#include "../../ecs/systems/TransformSyncSystem.h"
 #include "../rendering/RenderQueueBuilder.h"
 #include "../../math/math.h"
 
