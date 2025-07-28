@@ -12,6 +12,7 @@
  *      le scene non devono conoscere l’ordine di esecuzione dei sistemi.
  */
 
+#include "SceneManager.h"
 #include "Scene.h"
 #include "rendering/Renderer2D.h"
 #include "rendering/Renderer2DImpl.h"
@@ -35,100 +36,27 @@ namespace scene {
         Scene2D() = default;
         ~Scene2D() override = default;
 
-        /*--------------------------------------------------------------------------
-         * INITIALISATION
-         *--------------------------------------------------------------------------*/
-        void initialize2D(SceneManager& manager) {
-            auto* coord = getCoordinator();
-            if (!coord) return;
+        /* INITIALISATION: dichiarazione */
+        void initialize2D(SceneManager& manager);
 
-            /*‑‑ Crea l’implementazione concreta del Renderer2D ‑‑*/
-            renderer2D = std::make_unique<Renderer2DImpl>(manager.getRenderBackend());
+        /* RENDERING */
+        void render(RenderQueueBuilder& builder) override;
 
-            /*‑‑ REGISTRA I SISTEMI COMUNI ‑‑*/
-            // Physica
-            {
-                auto sys = coord->registerSystem<ecs::systems::PhysicsSystem>();
-                ecs::Signature sig;
-                sig.set(coord->getComponentType<ecs::components::Transform>());
-                sig.set(coord->getComponentType<ecs::components::Velocity>());
-                coord->setSystemSignature<ecs::systems::PhysicsSystem>(sig);
-            }
-            // Salute
-            {
-                auto sys = coord->registerSystem<ecs::systems::HealthSystem>();
-                ecs::Signature sig;
-                sig.set(coord->getComponentType<ecs::components::Health>());
-                coord->setSystemSignature<ecs::systems::HealthSystem>(sig);
-            }
-            // Rendering 2D
-            {
-                auto sys = coord->registerSystem<ecs::systems::Renderer2DSystem>(renderer2D.get());
-                ecs::Signature sig;
-                sig.set(coord->getComponentType<ecs::components::Transform>());
-                sig.set(coord->getComponentType<ecs::components::Renderable2D>());
-                coord->setSystemSignature<ecs::systems::Renderer2DSystem>(sig);
-            }
-        }
-
-        /*--------------------------------------------------------------------------
-         * RENDERING
-         *--------------------------------------------------------------------------*/
-        void render(RenderQueueBuilder& builder) override {
-            if (!renderer2D) return;
-
-            // Imposta la camera ortografica secondo la viewport corrente
-            Camera2D cam;
-            cam.setPosition({ 0.f, 0.f });
-
-            renderer2D->beginScene(cam);
-
-            /* Il sistema Renderer2DSystem verrà aggiornato dal loop ECS globale,
-               quindi qui non c’è nulla da fare (niente update manuale).           */
-
-            render2DCustom();       // Hook opzionale per disegni manuali
-
-            renderer2D->endScene();
-        }
-
-        /* Facoltativo: override per effetti particolari fra beginScene/endScene */
+        /* Facoltativo: override per effetti particolari */
         virtual void render2DCustom() {}
 
-        /*--------------------------------------------------------------------------
-         * ENTITY HELPERS
-         *--------------------------------------------------------------------------*/
+        /* ENTITY HELPERS */
         ecs::Entity createSprite(const math::Vec2f& pos,
             const math::Vec2f& size,
             const std::string& tex,
             const scene::Color& tint = scene::Color::White,
-            uint32_t layer = 0) {
-            auto* coord = getCoordinator();
-            if (!coord) return 0;
-
-            auto e = coord->createEntity();
-
-            ecs::components::Transform t;
-            t.position = { pos.x(), pos.y(), static_cast<float>(layer) };
-            t.scale = { size.x(), size.y(), 1.f };
-            coord->addComponent(e, t);
-
-            ecs::components::Renderable2D r;
-            r.textureId = tex;
-            r.color = tint;
-            coord->addComponent(e, r);
-
-            return e;
-        }
+            uint32_t layer = 0);
 
         ecs::Entity createColoredQuad(const math::Vec2f& pos,
             const math::Vec2f& size,
             const scene::Color& color,
-            uint32_t layer = 0) {
-            return createSprite(pos, size, /*texture*/"", color, layer);
-        }
+            uint32_t layer = 0);
 
-        /* Accessor comodo se proprio serve un draw immediato (debug, gizmo) */
         IRenderer2D* getRenderer2D() const { return renderer2D.get(); }
     };
-
 } // namespace scene

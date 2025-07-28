@@ -1,22 +1,20 @@
 #include "Scene2D.h"
-#include "SceneManager.h"
+#include <iostream>
 
 namespace scene {
 
     void Scene2D::initialize2D(SceneManager& manager) {
-        // Create Renderer2D instance for this scene
-        auto* resourceManager = getResourceManager(manager);
-        if (!resourceManager) {
-            std::cerr << "[Scene2D] Warning: No resource manager available" << std::endl;
-            return;
-        }
+        auto* coord = getCoordinator();
+        if (!coord) return;
 
-        // Get render queue builder from scene manager
-        RenderQueueBuilder& renderBuilder = manager.getRenderQueueBuilder();
+        // Ottieni resource manager e render queue builder
+        const auto& resMgr = manager.getResourceManager();
+        auto& builder = manager.getRenderQueueBuilder();
 
-        renderer2D = createRenderer2D(*resourceManager, renderBuilder);
+        // Crea l'istanza concreta del Renderer2D
+        renderer2D = std::make_unique<Renderer2DImpl>(*resMgr, builder);
 
-        // Configure Renderer2D
+        // Configura e inizializza il renderer
         RendererConfig2D config;
         config.maxQuadsPerBatch = 10000;
         config.enableBatching = true;
@@ -24,50 +22,76 @@ namespace scene {
 
         if (!renderer2D->init(config)) {
             std::cerr << "[Scene2D] Failed to initialize Renderer2D!" << std::endl;
+            renderer2D.reset();
             return;
         }
 
-        // Register ECS systems for 2D rendering
+        // Registra i sistemi ECS comuni
+        // PhysicsSystem
+        {
+            auto sys = coord->registerSystem<ecs::systems::PhysicsSystem>(coord);
+            ecs::Signature sig;
+            sig.set(coord->getComponentType<ecs::components::Transform>());
+            sig.set(coord->getComponentType<ecs::components::Velocity>());
+            coord->setSystemSignature<ecs::systems::PhysicsSystem>(sig);
+        }
+        // HealthSystem
+        {
+            auto sys = coord->registerSystem<ecs::systems::HealthSystem>(coord);
+            ecs::Signature sig;
+            sig.set(coord->getComponentType<ecs::components::Health>());
+            coord->setSystemSignature<ecs::systems::HealthSystem>(sig);
+        }
+        // Renderer2DSystem
+        {
+            auto sys = coord->registerSystem<ecs::systems::Renderer2DSystem>(coord, renderer2D.get());
+            ecs::Signature sig;
+            sig.set(coord->getComponentType<ecs::components::Transform>());
+            sig.set(coord->getComponentType<ecs::components::Renderable2D>());
+            coord->setSystemSignature<ecs::systems::Renderer2DSystem>(sig);
+        }
+    }
+
+    void Scene2D::render(RenderQueueBuilder& builder) {
+        if (!renderer2D) return;
+
+        // Imposta la camera ortografica usando la viewport del builder
+        Camera2D cam;
+        cam.setPosition({ 0.f, 0.f });
+
+        renderer2D->beginScene(cam);
+        render2DCustom();
+        renderer2D->endScene();
+    }
+
+    ecs::Entity Scene2D::createSprite(const math::Vec2f& pos,
+        const math::Vec2f& size,
+        const std::string& tex,
+        const scene::Color& tint,
+        uint32_t layer) {
         auto* coord = getCoordinator();
-        if (!coord) {
-            std::cerr << "[Scene2D] Warning: No ECS coordinator available" << std::endl;
-            return;
-        }
+        if (!coord) return 0;
 
-        // Register Renderer2D system (for converting Transform+Renderable2D to render commands)
-        auto renderSystemPtr = coord->registerSystem<ecs::systems::Renderer2DSystem>(coord, renderer2D.get());
-        renderSystem2D = renderSystemPtr; // shared_ptr assignment
+        auto e = coord->createEntity();
 
-        // Register physics system for Transform+Velocity movement
-        if (!physicsSystem) {
-            auto physicsSystemPtr = coord->registerSystem<ecs::systems::PhysicsSystem>(coord);
-            physicsSystem = physicsSystemPtr; // shared_ptr assignment
+        ecs::components::Transform t;
+        t.position = { pos.x(), pos.y(), static_cast<float>(layer) };
+        t.scale = { size.x(), size.y(), 1.f };
+        coord->addComponent(e, t);
 
-            // Set physics signature (Transform + Velocity)
-            ecs::Signature physicsSignature;
-            physicsSignature.set(coord->getComponentType<ecs::components::Transform>());
-            physicsSignature.set(coord->getComponentType<ecs::components::Velocity>());
-            coord->setSystemSignature<ecs::systems::PhysicsSystem>(physicsSignature);
-        }
+        ecs::components::Renderable2D r;
+        r.textureId = tex;
+        r.color = tint;
+        coord->addComponent(e, r);
 
-        // Register health system for damage/health management
-        if (!healthSystem) {
-            auto healthSystemPtr = coord->registerSystem<ecs::systems::HealthSystem>(coord);
-            healthSystem = healthSystemPtr; // shared_ptr assignment
+        return e;
+    }
 
-            // Set health signature (Health component only)
-            ecs::Signature healthSignature;
-            healthSignature.set(coord->getComponentType<ecs::components::Health>());
-            coord->setSystemSignature<ecs::systems::HealthSystem>(healthSignature);
-        }
-
-        // Set render signature (Transform + Renderable2D)
-        ecs::Signature renderSignature;
-        renderSignature.set(coord->getComponentType<ecs::components::Transform>());
-        renderSignature.set(coord->getComponentType<ecs::components::Renderable2D>());
-        coord->setSystemSignature<ecs::systems::Renderer2DSystem>(renderSignature);
-
-        std::cout << "[Scene2D] Renderer2D and ECS systems initialized successfully" << std::endl;
+    ecs::Entity Scene2D::createColoredQuad(const math::Vec2f& pos,
+        const math::Vec2f& size,
+        const scene::Color& color,
+        uint32_t layer) {
+        return createSprite(pos, size, "", color, layer);
     }
 
 } // namespace scene

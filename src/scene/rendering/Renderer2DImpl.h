@@ -207,7 +207,9 @@ namespace scene {
         void drawSquare(const math::Vec2f& position, float size, const Color& color,
             const TextureHandle& texture = "") {
             drawRect(Rect2D(position, math::Vec2f(size, size)), color, texture);
-        }        /**
+        }
+
+        /**
          * @brief Disegna una linea come rettangolo sottile
          */
         void drawLine(const math::Vec2f& start, const math::Vec2f& end,
