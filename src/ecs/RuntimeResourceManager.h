@@ -12,7 +12,7 @@ namespace ecs {
      *
      * This is different from the resources::ResourceManager which manages file-based resources.
      * This manages runtime global state objects like InputState, EventBus, etc.
-     *
+     * 
      * Renamed from GlobalResourceHolder to better reflect its purpose and avoid confusion
      * with the file-based ResourceManager in the resources namespace.
      */

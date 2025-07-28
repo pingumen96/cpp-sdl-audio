@@ -32,7 +32,7 @@
 #include "InputState.h"
 #include "EventBus.h"
 #include "GlobalFlags.h"
-#include "GlobalResourceHolder.h"
+#include "RuntimeResourceManager.h"
 
 // Events
 #include "events/InputEvents.h"
