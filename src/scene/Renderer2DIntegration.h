@@ -81,12 +81,12 @@ namespace scene {
             // 5. Create facade and setup test camera
             facade = std::make_unique<Render2DFacade>();
 
-            // Setup test camera (equivalent to TestRenderer2D's camera setup)
+            // Setup test camera
             testCamera.setViewportSize(math::Vec2f(static_cast<float>(windowWidth), static_cast<float>(windowHeight)));
             testCamera.setPosition(math::Vec2f(0.0f, 0.0f));
             testCamera.setZoom(1.0f);
 
-            // 6. Create test scene (equivalent to TestRenderer2D::createTestScene)
+            // 6. Create test scene
             createTestScene();
 
             initialized = true;

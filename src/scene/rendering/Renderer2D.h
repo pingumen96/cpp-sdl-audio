@@ -179,8 +179,9 @@ namespace scene {
 
         /**
          * @brief Inizia una nuova scena
+         * @deprecated Use Render2DFacade::flush() instead
          */
-        virtual void beginScene(const Camera2D& camera) = 0;
+        virtual void beginScene(const Camera2D& camera) [[deprecated("Use Render2DFacade::flush() instead")]] = 0;
 
         /**
          * @brief Disegna un rettangolo
@@ -196,8 +197,9 @@ namespace scene {
 
         /**
          * @brief Termina la scena e invia i comandi al batch
+         * @deprecated Use Render2DFacade::flush() instead
          */
-        virtual void endScene() = 0;
+        virtual void endScene() [[deprecated("Use Render2DFacade::flush() instead")]] = 0;
 
         /**
          * @brief Shutdown del renderer
