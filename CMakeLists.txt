@@ -150,26 +150,14 @@ target_include_directories(ecs_demo
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# add SDL for ecs_demo
+# Set console application for ecs_demo
 if(WIN32)
-    target_link_libraries(ecs_demo PRIVATE
-        SDL2::SDL2
-        SDL2_image::SDL2_image-static
-        SDL2_mixer::SDL2_mixer-static
-        SDL2_ttf::SDL2_ttf-static
-        OpenGL::GL
-        GLEW::GLEW
-    )
-else()
-    target_link_libraries(ecs_demo PRIVATE
-        SDL2::SDL2
-        SDL2_image::SDL2_image
-        SDL2_mixer::SDL2_mixer
-        SDL2_ttf::SDL2_ttf
-        OpenGL::GL
-        GLEW::GLEW
+    set_target_properties(ecs_demo PROPERTIES
+        LINK_FLAGS "-mconsole"
     )
 endif()
+
+# ECS demo doesn't need SDL dependencies - remove them
 
 # Renderer2D Demo executable
 add_executable(renderer2d_demo

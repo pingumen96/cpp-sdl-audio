@@ -42,8 +42,8 @@ namespace game {
 
         void update(float deltaTime) override {
             // Check if we should quit the game
-            if (coordinator->hasGlobalResource<ecs::GlobalFlags>()) {
-                auto& globalFlags = coordinator->getGlobalResource<ecs::GlobalFlags>();
+            if (coordinator->hasRuntimeResource<ecs::GlobalFlags>()) {
+                auto& globalFlags = coordinator->getRuntimeResource<ecs::GlobalFlags>();
                 if (globalFlags.quit) {
                     // Handle quit - this could emit an event or call a callback
                     handleQuitRequest();
@@ -58,21 +58,21 @@ namespace game {
          * @brief Get the input state resource
          */
         ecs::InputState* getInputState() {
-            return coordinator->getGlobalResourcePtr<ecs::InputState>();
+            return coordinator->getRuntimeResourcePtr<ecs::InputState>();
         }
 
         /**
          * @brief Get the event bus resource
          */
         ecs::EventBus* getEventBus() {
-            return coordinator->getGlobalResourcePtr<ecs::EventBus>();
+            return coordinator->getRuntimeResourcePtr<ecs::EventBus>();
         }
 
         /**
          * @brief Get the global flags resource
          */
         ecs::GlobalFlags* getGlobalFlags() {
-            return coordinator->getGlobalResourcePtr<ecs::GlobalFlags>();
+            return coordinator->getRuntimeResourcePtr<ecs::GlobalFlags>();
         }
 
     protected:
@@ -80,10 +80,10 @@ namespace game {
          * @brief Set up input-related global resources
          */
         void setupInputResources() {
-            // Add global resources to this scene's coordinator
-            coordinator->addGlobalResource<ecs::InputState>();
-            coordinator->addGlobalResource<ecs::EventBus>();
-            coordinator->addGlobalResource<ecs::GlobalFlags>();
+            // Add runtime resources to this scene's coordinator
+            coordinator->addRuntimeResource<ecs::InputState>();
+            coordinator->addRuntimeResource<ecs::EventBus>();
+            coordinator->addRuntimeResource<ecs::GlobalFlags>();
         }
 
         /**
@@ -95,16 +95,16 @@ namespace game {
             // Register and initialize input collection system
             inputCollectSystem = coordinator->registerSystem<ecs::systems::InputCollectSystem>();
             inputCollectSystem->init(
-                coordinator->getGlobalResourcePtr<ecs::InputState>(),
-                coordinator->getGlobalResourcePtr<ecs::GlobalFlags>(),
-                coordinator->getGlobalResourcePtr<ecs::EventBus>()
+                coordinator->getRuntimeResourcePtr<ecs::InputState>(),
+                coordinator->getRuntimeResourcePtr<ecs::GlobalFlags>(),
+                coordinator->getRuntimeResourcePtr<ecs::EventBus>()
             );
 
             // Register and initialize input mapping system
             inputMappingSystem = coordinator->registerSystem<ecs::systems::InputMappingSystem>();
             inputMappingSystem->init(
-                coordinator->getGlobalResourcePtr<ecs::InputState>(),
-                coordinator->getGlobalResourcePtr<ecs::EventBus>()
+                coordinator->getRuntimeResourcePtr<ecs::InputState>(),
+                coordinator->getRuntimeResourcePtr<ecs::EventBus>()
             );
 
             // Set system signatures (no specific components required for input systems)

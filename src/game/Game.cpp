@@ -65,8 +65,8 @@ void game::Game::mainLoop() {
             auto* currentScene = sceneManager->getCurrentScene();
             if (currentScene && currentScene->getCoordinator()) {
                 auto* coord = currentScene->getCoordinator();
-                if (coord->hasGlobalResource<ecs::GlobalFlags>()) {
-                    auto& globalFlags = coord->getGlobalResource<ecs::GlobalFlags>();
+                if (coord->hasRuntimeResource<ecs::GlobalFlags>()) {
+                    auto& globalFlags = coord->getRuntimeResource<ecs::GlobalFlags>();
                     if (globalFlags.quit) {
                         running = false;
                     }
