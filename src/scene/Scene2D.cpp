@@ -45,23 +45,32 @@ namespace scene {
         // Renderer2DSystem
         {
             auto sys = coord->registerSystem<ecs::systems::Renderer2DSystem>(coord, renderer2D.get());
+            renderer2DSystem = sys.get();  // Save raw pointer for camera management
+
             ecs::Signature sig;
             sig.set(coord->getComponentType<ecs::components::Transform>());
             sig.set(coord->getComponentType<ecs::components::Renderable2D>());
             coord->setSystemSignature<ecs::systems::Renderer2DSystem>(sig);
+
+            // Setup default scene camera
+            sceneCamera.setPosition({ 0.f, 0.f });
+            sceneCamera.setZoom(1.0f);
+            sceneCamera.setViewportSize({ 1920.0f, 1080.0f }); // Default viewport
+
+            // Set the camera in the system
+            renderer2DSystem->setActiveCamera(&sceneCamera);
         }
     }
 
     void Scene2D::render(RenderQueueBuilder& builder) {
-        if (!renderer2D) return;
+        if (!renderer2D || !renderer2DSystem) return;
 
-        // Imposta la camera ortografica usando la viewport del builder
-        Camera2D cam;
-        cam.setPosition({ 0.f, 0.f });
-
-        renderer2D->beginScene(cam);
+        // The Renderer2DSystem now handles beginScene/endScene internally through the facade
+        // We just need to call the custom render method for any additional rendering
         render2DCustom();
-        renderer2D->endScene();
+
+        // Note: ECS systems are automatically called by the Scene base class
+        // The Renderer2DSystem will collect all entities and render them via the facade
     }
 
     ecs::Entity Scene2D::createSprite(const math::Vec2f& pos,

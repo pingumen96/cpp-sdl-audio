@@ -54,7 +54,6 @@ find_package(GLEW REQUIRED)
 
 add_executable(sdl_app
 src/main.cpp
-src/AudioSample.cpp
 src/game/Game.h
 src/game/input/SceneInputSystem.cpp
 src/game/Game.cpp

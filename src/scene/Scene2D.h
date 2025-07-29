@@ -1,15 +1,15 @@
 #pragma once
 /*
- * Scene2D.h ― versione pulita e 100 % ECS‑oriented
+ * Scene2D.h - Clean version, 100% ECS-oriented
  *
- * Principi:
- *  • La scena NON conserva logica di gioco, input o stato di sistemi.
- *  • Si limita a:
- *      – creare le risorse grafiche (Renderer2D);
- *      – registrare i sistemi ECS generici necessari;
- *      – fornire utility per istanziare entità 2D (Transform + Renderable2D).
- *  • Le vistose stampe di debug e i puntatori a sistemi sono stati rimossi:
- *      le scene non devono conoscere l’ordine di esecuzione dei sistemi.
+ * Principles:
+ *  • The scene does NOT hold game logic, input, or system state.
+ *  • It is limited to:
+ *      - creating graphics resources (Renderer2D);
+ *      - registering necessary generic ECS systems;
+ *      - providing utilities to instantiate 2D entities (Transform + Renderable2D).
+ *  • Debug output and system pointers have been removed:
+ *      scenes should not know the execution order of systems.
  */
 
 #include "SceneManager.h"
@@ -27,22 +27,28 @@ namespace scene {
 
     class Scene2D : public Scene {
     protected:
-        /*  Unica risorsa di cui la scena si cura direttamente.
-            Viene passata al sistema Renderer2DSystem tramite riferimento raw
-            (l’ECS gestirà il ciclo di vita del sistema).                         */
-        std::unique_ptr<IRenderer2D> renderer2D{};
+        /*  The only resource the scene directly cares about.
+            Passed to the Renderer2DSystem via raw reference
+            (ECS will manage the system lifecycle).                         */
+        std::unique_ptr<scene::IRenderer2D> renderer2D{};
+
+        // Reference to the Renderer2DSystem for camera management
+        ecs::systems::Renderer2DSystem* renderer2DSystem = nullptr;
+
+        // Scene camera for 2D rendering
+        scene::Camera2D sceneCamera;
 
     public:
         Scene2D() = default;
         ~Scene2D() override = default;
 
-        /* INITIALISATION: dichiarazione */
+        /* INITIALIZATION: declaration */
         void initialize2D(SceneManager& manager);
 
         /* RENDERING */
         void render(RenderQueueBuilder& builder) override;
 
-        /* Facoltativo: override per effetti particolari */
+        /* Optional: override for special effects */
         virtual void render2DCustom() {}
 
         /* ENTITY HELPERS */
@@ -57,6 +63,17 @@ namespace scene {
             const scene::Color& color,
             uint32_t layer = 0);
 
-        IRenderer2D* getRenderer2D() const { return renderer2D.get(); }
+        scene::IRenderer2D* getRenderer2D() const { return renderer2D.get(); }
+
+        /**
+         * @brief Get access to the scene camera for modifications
+         */
+        scene::Camera2D& getSceneCamera() { return sceneCamera; }
+        const scene::Camera2D& getSceneCamera() const { return sceneCamera; }
+
+        /**
+         * @brief Get access to the Renderer2DSystem for advanced operations
+         */
+        ecs::systems::Renderer2DSystem* getRenderer2DSystem() const { return renderer2DSystem; }
     };
 } // namespace scene

@@ -2,6 +2,7 @@
 
 #include "../System.h"
 #include "../../scene/rendering/Renderer2D.h"
+#include "../../scene/rendering/Render2DFacade.h"
 #include "../components/CommonComponents.h"
 #include "../components/Renderable2D.h"
 #include <memory>
@@ -9,15 +10,18 @@
 namespace ecs::systems {
 
     /**
-     * @brief ECS System for 2D rendering using Renderer2D
+     * @brief ECS System for 2D rendering using Renderer2D with unified facade
      *
      * This system processes all entities with Transform and Renderable2D components
-     * and submits them to the Renderer2D for batched rendering.
+     * and submits them to the Render2DFacade for batched rendering. The facade handles
+     * the actual interaction with IRenderer2D, eliminating duplication with test systems.
      */
     class Renderer2DSystem : public System {
     private:
         Coordinator* coordinator;
         scene::IRenderer2D* renderer2D;
+        scene::Render2DFacade facade;
+        const scene::Camera2D* activeCamera = nullptr;
         bool enabled = true;
 
     public:
@@ -30,13 +34,16 @@ namespace ecs::systems {
             : coordinator(coord), renderer2D(renderer) {}
 
         /**
-         * @brief Update system - render all 2D entities
+         * @brief Update system - collect all 2D entities and submit to facade
          * @param deltaTime Time since last update (unused for rendering)
          */
         void update(float deltaTime) override {
-            if (!renderer2D || !enabled || !coordinator) {
+            if (!renderer2D || !enabled || !coordinator || !activeCamera) {
                 return;
             }
+
+            // Clear any previous frame's requests
+            facade.clear();
 
             // Process all entities with Transform and Renderable2D components
             for (auto const& entity : mEntities) {
@@ -57,15 +64,35 @@ namespace ecs::systems {
                 rect.size.x() *= transform.scale.x();
                 rect.size.y() *= transform.scale.y();
 
-                // Submit to renderer with layer support
-                renderer2D->drawRect(
+                // Submit to facade instead of directly to renderer
+                facade.submit(
                     rect,
                     renderable.color,
-                    0.0f,  // rotation (using transform.rotation in future)
                     renderable.textureId,
-                    renderable.layer
+                    renderable.layer,
+                    0.0f,  // rotation (using transform.rotation in future)
+                    renderable.depth
                 );
             }
+
+            // Flush all collected requests to the renderer
+            facade.flush(*renderer2D, *activeCamera);
+        }
+
+        /**
+         * @brief Set the active camera for rendering
+         * @param camera Camera to use for rendering (must remain valid during system lifetime)
+         */
+        void setActiveCamera(const scene::Camera2D* camera) {
+            activeCamera = camera;
+        }
+
+        /**
+         * @brief Get the current active camera
+         * @return Pointer to the active camera, or nullptr if none set
+         */
+        const scene::Camera2D* getActiveCamera() const {
+            return activeCamera;
         }
 
         /**
@@ -96,10 +123,30 @@ namespace ecs::systems {
             return renderer2D;
         }
 
+        /**
+         * @brief Get access to the facade for advanced usage
+         */
+        const scene::Render2DFacade& getFacade() const {
+            return facade;
+        }
+
+        /**
+         * @brief Get facade statistics
+         */
+        uint32_t getLastFrameQuadCount() const {
+            return facade.getLastFrameQuadCount();
+        }
+
         // Utility methods for common entity creation
 
         /**
          * @brief Create a sprite entity with Transform and Renderable2D
+         * @param position Sprite position (2D)
+         * @param size Sprite size
+         * @param texture Texture identifier
+         * @param color Sprite tint color
+         * @param layer Rendering layer
+         * @return Created entity ID
          */
         ecs::Entity createSpriteEntity(const math::Vec2f& position,
             const math::Vec2f& size,
@@ -127,6 +174,11 @@ namespace ecs::systems {
 
         /**
          * @brief Create a colored quad entity
+         * @param position Quad position (2D)
+         * @param size Quad size
+         * @param color Quad color
+         * @param layer Rendering layer
+         * @return Created entity ID
          */
         ecs::Entity createQuadEntity(const math::Vec2f& position,
             const math::Vec2f& size,
