@@ -8,7 +8,7 @@
 #include "../scene/SceneSystem.h"
 #include "../ecs/ECS.h"
 
-// Forward declarations for scenes (no longer need old states)
+// Forward declarations for scenes
 namespace game {
     class MenuScene;
     class GameScene;

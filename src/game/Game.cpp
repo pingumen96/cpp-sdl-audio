@@ -7,8 +7,8 @@
 #include "../core/Renderer.h"
 #include "../core/Window.h"
 // Include unified scene-based system
-#include "MenuScene.h"
-#include "GameScene.h"
+#include "../scenes/MenuScene.h"
+#include "../scenes/GameScene.h"
 
 game::Game::Game(core::Window& window)
     : renderer(window),

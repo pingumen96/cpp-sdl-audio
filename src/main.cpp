@@ -11,7 +11,7 @@
 #include "core/Surface.h"
 #include "core/Sdl.h"
 #include "game/Game.h"
-#include "game/GameScene.h"
+#include "scenes/GameScene.h"
 #include "scene/SceneSystem.h"
 
 int main() {
