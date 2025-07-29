@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "SceneTransitions.h"
 #include "rendering/NullBackend.h"
+#include "rendering/Renderer2DImpl.h"
 #include "../math/math.h"
 #include <iostream>
 #include <sstream>
@@ -39,6 +40,12 @@ namespace scene {
             return false;
         }
 
+        // Initialize 2D rendering components
+        if (!initialize2DComponents()) {
+            std::cerr << "[SceneManager] Failed to initialize 2D components!" << std::endl;
+            return false;
+        }
+
         initialized = true;
         std::cout << "[SceneManager] Initialized with " << renderBackend->getBackendType()
             << " backend (" << width << "x" << height << ")" << std::endl;
@@ -56,6 +63,9 @@ namespace scene {
 
         // Clear current transition
         currentTransition.reset();
+
+        // Shutdown 2D components
+        shutdown2DComponents();
 
         // Shutdown render backend
         if (renderBackend) {
@@ -277,6 +287,9 @@ namespace scene {
         renderWidth = width;
         renderHeight = height;
 
+        // Update 2D camera viewport
+        setup2DCamera();
+
         return renderBackend->resize(width, height);
     }
 
@@ -371,6 +384,150 @@ namespace scene {
         target.targetId = "backbuffer";
         target.isBackbuffer = true;
         return target;
+    }
+
+    bool SceneManager::initialize2DComponents() {
+        // Create Renderer2D
+        renderer2D = createRenderer2D(*resourceManager, renderBuilder);
+
+        RendererConfig2D config;
+        config.maxQuadsPerBatch = 1000;
+        config.enableBatching = true;
+        config.enableSorting = true;
+
+        if (!renderer2D->init(config)) {
+            std::cerr << "[SceneManager] Failed to initialize Renderer2D!" << std::endl;
+            return false;
+        }
+
+        // Create 2D facade
+        facade2D = std::make_unique<Render2DFacade>();
+
+        // Setup 2D camera
+        setup2DCamera();
+
+        std::cout << "[SceneManager] 2D components initialized successfully" << std::endl;
+        return true;
+    }
+
+    void SceneManager::shutdown2DComponents() {
+        facade2D.reset();
+
+        if (renderer2D) {
+            renderer2D->shutdown();
+            renderer2D.reset();
+        }
+
+        std::cout << "[SceneManager] 2D components shutdown complete" << std::endl;
+    }
+
+    void SceneManager::setup2DCamera() {
+        camera2D.setViewportSize(math::Vec2f(static_cast<float>(renderWidth), static_cast<float>(renderHeight)));
+        camera2D.setPosition(math::Vec2f(0.0f, 0.0f));
+        camera2D.setZoom(1.0f);
+    }
+
+    bool SceneManager::renderFrame() {
+        if (!initialized || !renderBackend) {
+            return false;
+        }
+
+        // Begin frame
+        if (!renderBackend->beginFrame()) {
+            return false;
+        }
+
+        // Clear render builder
+        renderBuilder.clear();
+
+        // Get camera and render target
+        CameraParams camera = getCurrentCamera();
+        RenderTarget target = getCurrentRenderTarget();
+
+        // Render scenes
+        for (auto& scene : sceneStack) {
+            if (scene) {
+                scene->render(renderBuilder);
+            }
+        }
+
+        // Render transition overlay if active
+        if (currentTransition) {
+            currentTransition->renderOverlay(renderBuilder);
+        }
+
+        // Flush 2D facade if it has requests
+        if (facade2D && renderer2D) {
+            facade2D->flush(*renderer2D, camera2D);
+        }
+
+        // Build command buffer and submit
+        CommandBuffer commandBuffer = renderBuilder.flush(camera, target);
+
+        // Update render stats
+        lastRenderStats.totalDrawItems = commandBuffer.getDrawItems().size();
+        lastRenderStats.totalPostEffects = commandBuffer.getPostEffects().size();
+        lastRenderStats.totalUIItems = commandBuffer.getUIItems().size();
+        lastRenderStats.commandBufferSize = commandBuffer.getDrawItems().size() +
+            commandBuffer.getPostEffects().size() +
+            commandBuffer.getUIItems().size();
+
+        // Add 2D stats if available
+        if (renderer2D) {
+            auto stats2D = renderer2D->getStats();
+            lastRenderStats.quadCount = stats2D.quadCount;
+            lastRenderStats.batchCount = stats2D.batchCount;
+        }
+        if (facade2D) {
+            lastRenderStats.facadeLastFrameQuads = facade2D->getLastFrameQuadCount();
+        }
+
+        // Submit to backend
+        if (!renderBackend->submit(commandBuffer)) {
+            std::cerr << "[SceneManager] Failed to submit command buffer!" << std::endl;
+            return false;
+        }
+
+        // Present
+        if (!renderBackend->present()) {
+            std::cerr << "[SceneManager] Failed to present frame!" << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+
+    void SceneManager::submit2DQuad(const math::Vec2f& position, const math::Vec2f& size,
+        const Color& color, const std::string& texture,
+        uint32_t layer, float depth) {
+        if (facade2D) {
+            if (texture.empty()) {
+                facade2D->submitColoredQuad(position, size, color, layer, depth);
+            } else {
+                facade2D->submitSprite(position, size, texture, color, layer, depth);
+            }
+        }
+    }
+
+    void SceneManager::clear2DRequests() {
+        if (facade2D) {
+            facade2D->clear();
+        }
+    }
+
+    void SceneManager::printStats() const {
+        if (!renderer2D || !facade2D) {
+            return;
+        }
+
+        auto stats = renderer2D->getStats();
+        auto queueSizes = renderBuilder.getQueueSizes();
+
+        std::cout << "[SceneManager Stats] - Scenes: " << sceneStack.size()
+            << ", Quads: " << stats.quadCount
+            << ", Batches: " << stats.batchCount
+            << ", Queue Draw Items: " << queueSizes.drawItems
+            << ", Facade Last Frame: " << facade2D->getLastFrameQuadCount() << std::endl;
     }
 
 } // namespace scene

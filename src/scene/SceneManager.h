@@ -5,6 +5,8 @@
 #include "SceneTransition.h"
 #include "rendering/IRenderBackend.h"
 #include "rendering/RenderQueueBuilder.h"
+#include "rendering/Renderer2D.h"
+#include "rendering/Render2DFacade.h"
 #include "../resources/ResourceSystem.h"
 #include <vector>
 #include <memory>
@@ -27,6 +29,11 @@ namespace scene {
         // Rendering
         RenderBackendPtr renderBackend;
         RenderQueueBuilder renderBuilder;
+
+        // 2D Rendering components (centralized)
+        std::unique_ptr<IRenderer2D> renderer2D;
+        std::unique_ptr<Render2DFacade> facade2D;
+        Camera2D camera2D;
 
         // Resources
         std::unique_ptr<resources::ResourceManager> resourceManager;
@@ -117,6 +124,24 @@ namespace scene {
         bool render();
 
         /**
+         * @brief Render a complete frame including 2D facade flush
+         * @return true if rendering succeeded
+         */
+        bool renderFrame();
+
+        /**
+         * @brief Submit requests to 2D facade
+         */
+        void submit2DQuad(const math::Vec2f& position, const math::Vec2f& size,
+            const Color& color, const std::string& texture = "",
+            uint32_t layer = 0, float depth = 0.0f);
+
+        /**
+         * @brief Clear 2D facade requests
+         */
+        void clear2DRequests();
+
+        /**
          * @brief Handle input (forwards to scenes from top to bottom)
          * @param inputData Input data to process
          * @return true if input was consumed
@@ -175,6 +200,27 @@ namespace scene {
         RenderQueueBuilder& getRenderQueueBuilder() { return renderBuilder; }
 
         /**
+         * @brief Get 2D renderer
+         */
+        IRenderer2D* getRenderer2D() const { return renderer2D.get(); }
+
+        /**
+         * @brief Get 2D facade
+         */
+        Render2DFacade* get2DFacade() const { return facade2D.get(); }
+
+        /**
+         * @brief Get 2D camera
+         */
+        Camera2D& getCamera2D() { return camera2D; }
+        const Camera2D& getCamera2D() const { return camera2D; }
+
+        /**
+         * @brief Set 2D camera
+         */
+        void setCamera2D(const Camera2D& camera) { camera2D = camera; }
+
+        /**
          * @brief Get current render size
          */
         std::pair<uint32_t, uint32_t> getRenderSize() const { return { renderWidth, renderHeight }; }
@@ -202,9 +248,18 @@ namespace scene {
             size_t totalPostEffects = 0;
             size_t totalUIItems = 0;
             size_t commandBufferSize = 0;
+            // 2D rendering stats
+            size_t quadCount = 0;
+            size_t batchCount = 0;
+            size_t facadeLastFrameQuads = 0;
         };
 
         RenderStats getLastRenderStats() const;
+
+        /**
+         * @brief Print comprehensive statistics
+         */
+        void printStats() const;
 
     private:
         /**
@@ -227,6 +282,21 @@ namespace scene {
          * @param deltaTime Time elapsed since last update
          */
         void updateTransition(float deltaTime);
+
+        /**
+         * @brief Initialize 2D rendering components
+         */
+        bool initialize2DComponents();
+
+        /**
+         * @brief Shutdown 2D rendering components
+         */
+        void shutdown2DComponents();
+
+        /**
+         * @brief Setup 2D camera with current render size
+         */
+        void setup2DCamera();
 
         /**
          * @brief Get camera parameters for rendering

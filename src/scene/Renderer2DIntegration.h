@@ -1,40 +1,28 @@
 #pragma once
 
-#include "rendering/Renderer2DImpl.h"
+#include "SceneManager.h"
 #include "rendering/NullBackend.h"
-#include "rendering/Render2DFacade.h"
-#include "../resources/ResourceManager.h"
 #include <memory>
 #include <iostream>
 
 namespace scene {
 
     /**
-     * @brief Example of Renderer2D integration with existing architecture using unified facade
+     * @brief Example of Renderer2D integration using SceneManager
      *
-     * This class demonstrates how to integrate Renderer2D into the existing lifecycle
-     * (init → beginFrame → submit → present) without breaking the existing layered approach.
-     *
-     * Uses the new Render2DFacade instead of TestRenderer2D to eliminate code duplication
-     * between ECS and standalone test environments.
+     * This class demonstrates how to use the centralized SceneManager
+     * instead of managing components directly. All rendering functionality
+     * is now delegated to SceneManager, eliminating code duplication.
      *
      * NOTE: For ECS integration, use ecs::systems::Renderer2DSystem directly in scenes
      * that inherit from Scene2D.
      */
     class Renderer2DIntegrationExample {
     private:
-        // External dependencies
-        std::unique_ptr<resources::ResourceManager> resourceManager;
-        std::unique_ptr<IRenderBackend> renderBackend;
-
-        // 2D components
-        std::unique_ptr<RenderQueueBuilder> renderQueueBuilder;
-        std::unique_ptr<IRenderer2D> renderer2D;
-        std::unique_ptr<Render2DFacade> facade;
-        Camera2D testCamera;
+        // Single dependency - SceneManager manages everything
+        std::unique_ptr<SceneManager> sceneManager;
 
         // State
-        bool initialized = false;
         uint32_t frameCount = 0;
 
     public:
@@ -42,211 +30,125 @@ namespace scene {
         ~Renderer2DIntegrationExample() = default;
 
         /**
-         * @brief Initialize the entire system
+         * @brief Initialize the entire system using SceneManager
          */
         bool init(uint32_t windowWidth = 1920, uint32_t windowHeight = 1080) {
-            if (initialized) {
+            if (sceneManager && sceneManager->isInitialized()) {
                 return true;
             }
 
-            std::cout << "[Renderer2D Integration] Initializing with unified facade..." << std::endl;
+            std::cout << "[Renderer2D Integration] Initializing with SceneManager..." << std::endl;
 
-            // 1. Create Resource Manager
-            resourceManager = std::make_unique<resources::ResourceManager>();
-            // Here you should initialize the ResourceManager with your parameters
+            // Create SceneManager with NullBackend for testing
+            auto backend = std::make_unique<NullBackend>();
+            sceneManager = std::make_unique<SceneManager>(std::move(backend));
 
-            // 2. Create Render Backend (NullBackend for testing)
-            renderBackend = std::make_unique<NullBackend>();
-            if (!renderBackend->init(windowWidth, windowHeight)) {
-                std::cerr << "[Renderer2D Integration] Failed to initialize render backend!" << std::endl;
+            if (!sceneManager->initialize(windowWidth, windowHeight)) {
+                std::cerr << "[Renderer2D Integration] Failed to initialize SceneManager!" << std::endl;
                 return false;
             }
 
-            // 3. Create RenderQueueBuilder
-            renderQueueBuilder = std::make_unique<RenderQueueBuilder>();
-
-            // 4. Create Renderer2D
-            renderer2D = createRenderer2D(*resourceManager, *renderQueueBuilder);
-
-            RendererConfig2D config;
-            config.maxQuadsPerBatch = 1000;
-            config.enableBatching = true;
-            config.enableSorting = true;
-
-            if (!renderer2D->init(config)) {
-                std::cerr << "[Renderer2D Integration] Failed to initialize Renderer2D!" << std::endl;
-                return false;
-            }
-
-            // 5. Create facade and setup test camera
-            facade = std::make_unique<Render2DFacade>();
-
-            // Setup test camera
-            testCamera.setViewportSize(math::Vec2f(static_cast<float>(windowWidth), static_cast<float>(windowHeight)));
-            testCamera.setPosition(math::Vec2f(0.0f, 0.0f));
-            testCamera.setZoom(1.0f);
-
-            // 6. Create test scene
+            // Create initial test scene
             createTestScene();
 
-            initialized = true;
             std::cout << "[Renderer2D Integration] Initialization complete!" << std::endl;
             return true;
         }
 
         /**
-         * @brief Create test scene (equivalent to TestRenderer2D::createTestScene)
+         * @brief Create test scene using SceneManager's 2D facade
          */
         void createTestScene() {
-            if (!facade) {
+            if (!sceneManager) {
                 return;
             }
 
             // Clear any existing requests
-            facade->clear();
+            sceneManager->clear2DRequests();
 
             // Background
-            facade->submitColoredQuad(math::Vec2f(0.0f, 0.0f), math::Vec2f(1920.0f, 1080.0f), Color::Blue);
+            sceneManager->submit2DQuad(math::Vec2f(0.0f, 0.0f), math::Vec2f(1920.0f, 1080.0f), Color::Blue);
 
             // Colored rectangles
-            facade->submitColoredQuad(math::Vec2f(-200.0f, 0.0f), math::Vec2f(100.0f, 100.0f), Color::Red);
-            facade->submitColoredQuad(math::Vec2f(0.0f, 0.0f), math::Vec2f(100.0f, 100.0f), Color::Green);
-            facade->submitColoredQuad(math::Vec2f(200.0f, 0.0f), math::Vec2f(100.0f, 100.0f), Color::Yellow);
+            sceneManager->submit2DQuad(math::Vec2f(-200.0f, 0.0f), math::Vec2f(100.0f, 100.0f), Color::Red);
+            sceneManager->submit2DQuad(math::Vec2f(0.0f, 0.0f), math::Vec2f(100.0f, 100.0f), Color::Green);
+            sceneManager->submit2DQuad(math::Vec2f(200.0f, 0.0f), math::Vec2f(100.0f, 100.0f), Color::Yellow);
 
             // Smaller rectangles
-            facade->submitColoredQuad(math::Vec2f(-100.0f, 150.0f), math::Vec2f(50.0f, 50.0f), Color::Magenta);
-            facade->submitColoredQuad(math::Vec2f(100.0f, 150.0f), math::Vec2f(50.0f, 50.0f), Color::Cyan);
+            sceneManager->submit2DQuad(math::Vec2f(-100.0f, 150.0f), math::Vec2f(50.0f, 50.0f), Color::Magenta);
+            sceneManager->submit2DQuad(math::Vec2f(100.0f, 150.0f), math::Vec2f(50.0f, 50.0f), Color::Cyan);
         }
 
         /**
-         * @brief Rendering cycle for one frame
+         * @brief Rendering cycle for one frame using SceneManager
          */
         void renderFrame() {
-            if (!initialized) {
-                std::cerr << "[Renderer2D Integration] Not initialized!" << std::endl;
+            if (!sceneManager || !sceneManager->isInitialized()) {
+                std::cerr << "[Renderer2D Integration] SceneManager not initialized!" << std::endl;
                 return;
             }
 
             frameCount++;
 
-            // === PHASE 1: Begin Frame ===
-            if (!renderBackend->beginFrame()) {
-                std::cerr << "[Renderer2D Integration] Failed to begin frame!" << std::endl;
+            // Re-create test scene each frame (for demo purposes)
+            // In a real application, you would collect draw requests from your game logic
+            createTestScene();
+
+            // Render complete frame through SceneManager
+            if (!sceneManager->renderFrame()) {
+                std::cerr << "[Renderer2D Integration] Failed to render frame!" << std::endl;
                 return;
             }
 
-            // === PHASE 2: Clear RenderQueueBuilder ===
-            renderQueueBuilder->clear();
-
-            // === PHASE 3: Execute facade rendering ===
-            // NOTE: For real ECS integration, use ecs::systems::Renderer2DSystem
-            // which is automatically managed by Scene2D
-            if (facade && renderer2D) {
-                // Re-create test scene each frame (for demo purposes)
-                // In a real application, you would collect draw requests from your game logic
-                createTestScene();
-
-                // Flush all requests to the renderer
-                facade->flush(*renderer2D, testCamera);
-            }
-
-            // === PHASE 4: Flush RenderQueueBuilder ===
-            // Here you should set up camera and render target
-            CameraParams cameraParams;
-            // Set up main camera parameters (different from Camera2D)
-            // cameraParams.viewMatrix = mainCamera.getViewMatrix();
-            // cameraParams.projectionMatrix = mainCamera.getProjectionMatrix();
-
-            RenderTarget target;
-            target.width = 1920;
-            target.height = 1080;
-            target.isBackbuffer = true;
-
-            CommandBuffer commandBuffer = renderQueueBuilder->flush(cameraParams, target);
-
-            // === PHASE 5: Submit to Backend ===
-            if (!renderBackend->submit(commandBuffer)) {
-                std::cerr << "[Renderer2D Integration] Failed to submit command buffer!" << std::endl;
-                return;
-            }
-
-            // === PHASE 6: Present ===
-            if (!renderBackend->present()) {
-                std::cerr << "[Renderer2D Integration] Failed to present frame!" << std::endl;
-                return;
-            }
-
-            // === PHASE 7: Statistics and debug info ===
+            // Statistics and debug info
             if (frameCount % 60 == 0) { // Every second (assuming 60 FPS)
                 printStats();
             }
         }
 
         /**
-         * @brief Shutdown the entire system
+         * @brief Shutdown the entire system using SceneManager
          */
         void shutdown() {
-            if (!initialized) {
+            if (!sceneManager) {
                 return;
             }
 
             std::cout << "[Renderer2D Integration] Shutting down..." << std::endl;
 
-            facade.reset();
+            sceneManager->shutdown();
+            sceneManager.reset();
 
-            if (renderer2D) {
-                renderer2D->shutdown();
-                renderer2D.reset();
-            }
-
-            renderQueueBuilder.reset();
-
-            if (renderBackend) {
-                renderBackend->shutdown();
-                renderBackend.reset();
-            }
-
-            resourceManager.reset();
-
-            initialized = false;
             std::cout << "[Renderer2D Integration] Shutdown complete!" << std::endl;
         }
 
         /**
-         * @brief Print rendering statistics
+         * @brief Print rendering statistics using SceneManager
          */
         void printStats() const {
-            if (!renderer2D || !facade) {
-                return;
+            if (sceneManager) {
+                sceneManager->printStats();
             }
-
-            auto stats = renderer2D->getStats();
-            auto queueSizes = renderQueueBuilder->getQueueSizes();
-
-            std::cout << "[Renderer2D Stats] Frame " << frameCount
-                << " - Quads: " << stats.quadCount
-                << ", Batches: " << stats.batchCount
-                << ", Queue Draw Items: " << queueSizes.drawItems
-                << ", Facade Last Frame: " << facade->getLastFrameQuadCount() << std::endl;
         }
 
         /**
-         * @brief Access to components for advanced testing
+         * @brief Access to components for advanced testing through SceneManager
          */
-        IRenderer2D* getRenderer2D() { return renderer2D.get(); }
-        Render2DFacade* getFacade() { return facade.get(); }
-        Camera2D* getTestCamera() { return &testCamera; }
-        IRenderBackend* getRenderBackend() { return renderBackend.get(); }
+        IRenderer2D* getRenderer2D() { return sceneManager ? sceneManager->getRenderer2D() : nullptr; }
+        Render2DFacade* getFacade() { return sceneManager ? sceneManager->get2DFacade() : nullptr; }
+        Camera2D* getTestCamera() { return sceneManager ? &sceneManager->getCamera2D() : nullptr; }
+        IRenderBackend* getRenderBackend() { return sceneManager ? sceneManager->getRenderBackend() : nullptr; }
+        SceneManager* getSceneManager() { return sceneManager.get(); }
 
-        bool isInitialized() const { return initialized; }
+        bool isInitialized() const { return sceneManager && sceneManager->isInitialized(); }
         uint32_t getFrameCount() const { return frameCount; }
     };
 
     /**
-     * @brief Helper function to create and test the system with unified facade
+     * @brief Helper function to create and test the system with SceneManager
      */
     inline void runRenderer2DTest(int numFrames = 100) {
-        std::cout << "=== Renderer2D Integration Test (Unified Facade) ===" << std::endl;
+        std::cout << "=== Renderer2D Integration Test (SceneManager) ===" << std::endl;
 
         Renderer2DIntegrationExample example;
 
@@ -274,3 +176,4 @@ namespace scene {
     }
 
 } // namespace scene
+
