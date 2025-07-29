@@ -253,7 +253,9 @@ namespace ecs {
             return mComponentManager->getRegisteredComponentCount();
         }
 
-        // Global resource methods
+        // Runtime resource methods
+        // These manage runtime objects in the ECS system (InputState, EventBus, etc.)
+        // Different from resources::ResourceManager which handles file-based assets
 
         /**
          * @brief Add a runtime resource of type T
@@ -325,64 +327,6 @@ namespace ecs {
          */
         size_t getRuntimeResourceCount() const {
             return mRuntimeResourceManager->getResourceCount();
-        }
-
-        // Legacy methods for backward compatibility
-        // These delegate to the new runtime resource methods
-
-        /**
-         * @deprecated Use addRuntimeResource instead
-         */
-        template<typename T, typename... Args>
-        T& addGlobalResource(Args&&... args) {
-            return addRuntimeResource<T>(std::forward<Args>(args)...);
-        }
-
-        /**
-         * @deprecated Use getRuntimeResource instead
-         */
-        template<typename T>
-        T& getGlobalResource() {
-            return getRuntimeResource<T>();
-        }
-
-        /**
-         * @deprecated Use getRuntimeResource instead
-         */
-        template<typename T>
-        const T& getGlobalResource() const {
-            return getRuntimeResource<T>();
-        }
-
-        /**
-         * @deprecated Use getRuntimeResourcePtr instead
-         */
-        template<typename T>
-        T* getGlobalResourcePtr() {
-            return getRuntimeResourcePtr<T>();
-        }
-
-        /**
-         * @deprecated Use hasRuntimeResource instead
-         */
-        template<typename T>
-        bool hasGlobalResource() const {
-            return hasRuntimeResource<T>();
-        }
-
-        /**
-         * @deprecated Use removeRuntimeResource instead
-         */
-        template<typename T>
-        bool removeGlobalResource() {
-            return removeRuntimeResource<T>();
-        }
-
-        /**
-         * @deprecated Use getRuntimeResourceCount instead
-         */
-        size_t getGlobalResourceCount() const {
-            return getRuntimeResourceCount();
         }
     };
 

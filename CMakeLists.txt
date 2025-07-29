@@ -150,7 +150,26 @@ target_include_directories(ecs_demo
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# ECS is header-only, so no additional libraries needed for basic demo
+# add SDL for ecs_demo
+if(WIN32)
+    target_link_libraries(ecs_demo PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image-static
+        SDL2_mixer::SDL2_mixer-static
+        SDL2_ttf::SDL2_ttf-static
+        OpenGL::GL
+        GLEW::GLEW
+    )
+else()
+    target_link_libraries(ecs_demo PRIVATE
+        SDL2::SDL2
+        SDL2_image::SDL2_image
+        SDL2_mixer::SDL2_mixer
+        SDL2_ttf::SDL2_ttf
+        OpenGL::GL
+        GLEW::GLEW
+    )
+endif()
 
 # Renderer2D Demo executable
 add_executable(renderer2d_demo
