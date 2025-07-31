@@ -1,3 +1,7 @@
+# [![](https://img.shields.io/badge/status-abbandonato-red)](https://github.com/pingumen96/cpp-sdl-audio)
+
+**ATTENZIONE: Questo progetto è abbandonato. Era nato solo come sandbox personale per fare delle prove e giocare con la creazione di un motore di gioco in C++. Non è più mantenuto e non verrà sviluppato ulteriormente.**
+
 # Progetto C++ SDL2 + OpenGL
 
 [![CI Tests](https://github.com/pingumen96/cpp-sdl-audio/actions/workflows/ci.yml/badge.svg)](https://github.com/pingumen96/cpp-sdl-audio/actions/workflows/ci.yml)
